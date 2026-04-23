@@ -1,0 +1,130 @@
+---
+title: WraithVPN
+description: WireGuard-based VPN served by Katafract-operated exit nodes in 8 cities. Included in Enclave and Sovereign tiers.
+---
+
+WraithVPN is the VPN layer of the Katafract platform. WireGuard under the hood, served by 10 exit nodes the company operates directly, with a Shadowsocks + v2ray-plugin fallback for environments that block WireGuard.
+
+## Exit nodes
+
+| City | Region code | IP family |
+|---|---|---|
+| Nuremberg (Hetzner) | `nbg1` | IPv4 + IPv6 |
+| Helsinki (Hetzner) | `hel1` | IPv4 + IPv6 |
+| Ashburn (Hetzner) | `ash` | IPv4 + IPv6 |
+| Hillsboro (Hetzner) | `hil` | IPv4 + IPv6 |
+| Newark (Vultr) | `ewr1` | IPv4 |
+| Tokyo (Vultr) | `nrt1` | IPv4 |
+| Mumbai (Vultr) | `bom1` | IPv4 |
+| Singapore x2 (Vultr) | `sgp2` / `sgp3` | IPv4 |
+
+All nodes route IPv4 traffic over WireGuard UDP 51820. Haven DNS is bound to the WireGuard interface on every node.
+
+## Tiers
+
+- **Enclave** — single-hop. Client picks one exit.
+- **Sovereign** — multi-hop. Entry node + distinct-country exit. Adds ~20-40 ms.
+
+## Protocols
+
+- **WireGuard** (default). Standard. `wg0` on every node, UDP 51820.
+- **Shadowsocks + v2ray-plugin** (fallback). TLS-tunneled Shadowsocks on ports 8443-8452. Indistinguishable from HTTPS to a DPI observer.
+
+AmneziaWG (`awg`) was in the fleet through April 2026. It was retired in favor of the Shadowsocks fallback because SS-TLS is more universally effective against modern DPI and has fewer client-side compatibility constraints.
+
+## Provisioning a peer
+
+The client flow:
+
+```
+ ┌──────────────┐  POST /v1/peers/provision   ┌──────────────┐
+ │  Wraith app  │─────────────────────────────►│ Artemis API  │
+ │              │   { device_id, region }      │              │
+ │              │                              │              │
+ │              │◄──── WireGuard config ────── │              │
+ └──────────────┘  { private_key, address,     └──────┬───────┘
+                    dns, peer_public_key,             │
+                    endpoint, allowed_ips,            │ ssh to node
+                    persistent_keepalive }            ▼
+                                                ┌──────────────┐
+                                                │ WraithGate   │
+                                                │ node         │
+                                                │ wg addconf   │
+                                                └──────────────┘
+```
+
+Request:
+
+```bash
+curl -X POST https://api.katafract.com/v1/peers/provision \
+  -H "Authorization: Bearer <sigil-token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "device_id": "<opaque hash>",
+    "region": "ash",
+    "wg_profile": "std"
+  }'
+```
+
+Response (abbreviated):
+
+```jsonc
+{
+  "interface": {
+    "private_key": "…",
+    "address": "10.11.6.23/32",
+    "dns": "10.11.6.1",
+    "mtu": 1420
+  },
+  "peer": {
+    "public_key": "…",
+    "endpoint": "87.99.128.159:51820",
+    "allowed_ips": "0.0.0.0/0",
+    "persistent_keepalive": 25
+  },
+  "node_id": "vpn-iad-01",
+  "expires_at": 1743973231
+}
+```
+
+Apps write this directly into a NetworkExtension (`NEPacketTunnelProvider` on iOS, `VpnService` on Android, `wg-quick` on Linux).
+
+## Router provisioning
+
+For routers that lack a first-class WireGuard client app (OpenWRT, DD-WRT, Ubiquiti EdgeOS, Mikrotik), use `POST /v1/peers/provision-router` — same schema as `/provision` but drops client-side features that routers don't need (no persistent_keepalive override, for example) and returns the standard WireGuard config regardless of the device's AWG support.
+
+```bash
+curl -X POST https://api.katafract.com/v1/peers/provision-router \
+  -H "Authorization: Bearer <sigil-token>" \
+  -d '{ "device_id": "router-living-room", "region": "ash" }'
+```
+
+The response format is identical. Paste the config into your router's WireGuard peer.
+
+## Peer isolation
+
+Server-side iptables enforce that every WireGuard client is **internet-only**:
+
+```
+wg0 → eth0                   ACCEPT
+eth0 → wg0 ESTABLISHED,REL   ACCEPT
+wg0 → *                      DROP
+```
+
+Translated: you can reach the internet, the internet can reply to you, but you cannot reach another Wraith client or the Katafract mesh. This is enforced at every node regardless of whether the client speaks WireGuard or Shadowsocks.
+
+## Kill switch
+
+Clients implement a local kill switch — if the tunnel drops, no traffic leaves the device until the tunnel re-establishes. The iOS implementation uses NetworkExtension `includeAllNetworks` + `excludeLocalNetworks: false`. This is the "On Demand" behavior most VPN providers describe in their marketing.
+
+## Multi-hop (Sovereign)
+
+Sovereign's multi-hop routes `client → entry node (country A) → exit node (country B) → internet`. The entry and exit nodes are always in different countries. Katafract picks the entry node based on latency from the client; the exit node is picked from a curated list that excludes the entry node's country.
+
+Multi-hop adds ~20-40ms for typical routing (e.g. US client → EU entry → US exit: ~15ms baseline + 25ms detour).
+
+## Related
+
+- [Haven DNS](/modules/haven/) — bundled resolver
+- [Sigil — identity](/modules/sigil/) — token required for provisioning
+- [Threat model](/architecture/threat-model/) — what WraithVPN does and does not defend against

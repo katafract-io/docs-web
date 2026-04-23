@@ -1,0 +1,40 @@
+---
+title: Authenticator — TOTP (roadmap)
+description: A Microsoft Authenticator / Authy / Google Authenticator equivalent that syncs through Vaultyx. Planned, cheapest first ship.
+---
+
+:::caution[Roadmap]
+Authenticator is not shipped. This page describes what will ship.
+:::
+
+## What it will be
+
+A TOTP/HOTP code generator that:
+
+- Produces six-digit codes per RFC 6238 for any service that supports standard TOTP.
+- Syncs across your devices via Vaultyx (encrypted at rest, zero-knowledge).
+- Supports push-based 2FA via Sigil challenges (for services that integrate with Katafract identity — not a replacement for Duo or Okta).
+- Runs fully offline. Code generation never touches the network. Airplane mode + DNS-blocked networks are not an issue.
+
+Bundle: `com.katafract.authenticator`. Pricing: included in Enclave and Sovereign tiers.
+
+## Why this ships first
+
+Per the platform growth playbook, Authenticator is the cheapest of the five roadmap modules:
+
+- Pure client app with a small sync API (reuse of Vaultyx manifests).
+- No browser extensions, no regulatory integration, no financial flows.
+- Estimated 2-3 weeks of solo founder work from scratch.
+- Produces "Microsoft Authenticator-parity" talking point fast.
+
+Shipping Authenticator first also extracts the shared `KatafractSecretEnvelope` SPM module that Keyring will later reuse.
+
+## Target timeline
+
+Not committed. 2-3 week working estimate. Next sprint candidate after Wraith Android migration stabilizes.
+
+## Related
+
+- [Sigil](/modules/sigil/)
+- [Vaultyx](/modules/vaultyx/) — where TOTP seeds will sync
+- [Keyring](/roadmap/keyring/) — ships after Authenticator

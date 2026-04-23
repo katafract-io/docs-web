@@ -1,0 +1,105 @@
+/* Katafract brand tokens — applied over Starlight's defaults.
+   Palette: kataNavy deep background · kataIce neutral text · kataGold hairline/accent ·
+   kataSapphire CTAs · kataChampagne for sealed/success motifs. */
+
+:root {
+  --sl-color-white: #f4ede0;            /* kataIce */
+  --sl-color-gray-1: #e5ddd0;
+  --sl-color-gray-2: #c3bbae;
+  --sl-color-gray-3: #938d82;
+  --sl-color-gray-4: #5f5b53;
+  --sl-color-gray-5: #2a241c;           /* kataMidnight */
+  --sl-color-gray-6: #1a150f;
+  --sl-color-black: #0a0a0f;            /* kataNavy */
+
+  --sl-color-accent: #0b4f9e;           /* kataSapphire */
+  --sl-color-accent-high: #d4c58a;      /* kataChampagne */
+  --sl-color-accent-low: #0a1e3f;
+
+  --sl-color-text-accent: #c9a961;      /* kataGold */
+
+  --sl-font: 'DM Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --sl-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --sl-font-serif: 'Cormorant Garamond', ui-serif, Georgia, serif;
+}
+
+:root[data-theme='dark'] {
+  --sl-color-bg: #0a0a0f;
+  --sl-color-bg-nav: #0d1020;
+  --sl-color-bg-sidebar: #0a0a0f;
+  --sl-color-bg-accent: var(--sl-color-accent-low);
+  --sl-color-hairline: #1c1d2c;
+  --sl-color-hairline-light: #2a2a38;
+  --sl-color-hairline-shade: #14151e;
+  --sl-color-text: #f4ede0;
+  --sl-color-text-invert: #0a0a0f;
+}
+
+:root[data-theme='light'] {
+  --sl-color-bg: #f4ede0;
+  --sl-color-bg-nav: #e9dfcd;
+  --sl-color-bg-sidebar: #f4ede0;
+  --sl-color-text: #0a0a0f;
+  --sl-color-text-invert: #f4ede0;
+  --sl-color-hairline: #c9a961;
+  --sl-color-hairline-light: #d8b87a;
+}
+
+/* Serif display headings — matches the main katafract.com hero treatment. */
+.sl-markdown-content h1,
+.sl-markdown-content h2 {
+  font-family: var(--sl-font-serif);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.sl-markdown-content h1 {
+  font-size: 2.4rem;
+  line-height: 1.15;
+  border-bottom: 1px solid var(--sl-color-text-accent);
+  padding-bottom: 0.5rem;
+}
+
+.sl-markdown-content h2 {
+  font-size: 1.8rem;
+  line-height: 1.2;
+  margin-top: 2.5rem;
+}
+
+/* Inline code + code blocks — keep the operator-grade monospace vibe. */
+.sl-markdown-content :not(pre) > code {
+  background: var(--sl-color-bg-accent);
+  color: var(--sl-color-accent-high);
+  border: 1px solid var(--sl-color-hairline);
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+}
+
+/* Gold-hairline accents on quote blocks and admonitions. */
+.sl-markdown-content blockquote {
+  border-left: 2px solid var(--sl-color-text-accent);
+  background: rgba(201, 169, 97, 0.05);
+  padding: 0.75rem 1rem;
+}
+
+/* Sidebar eyebrow group labels — gold monospace, same treatment as main site. */
+.sidebar-content .group-label > .large {
+  font-family: var(--sl-font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--sl-color-text-accent);
+}
+
+/* External-link arrow in gold. */
+.sl-markdown-content a[href^='http']::after {
+  content: ' →';
+  color: var(--sl-color-text-accent);
+}
+
+/* The default Starlight hero splash is fine, but kill the emoji-ish vibe. */
+.hero {
+  background: linear-gradient(160deg, var(--sl-color-bg) 0%, #12101a 100%);
+  border-bottom: 1px solid var(--sl-color-hairline);
+}

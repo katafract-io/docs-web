@@ -1,0 +1,58 @@
+---
+title: Virtual cards (roadmap)
+description: Throwaway virtual credit cards, one per subscription service. Cancel the card, cancel the subscription. Planned via Stripe Issuing.
+---
+
+:::caution[Roadmap]
+Virtual cards are not shipped. This page describes the intended product, not live functionality.
+:::
+
+## What it will be
+
+Single-use and subscription-scoped virtual credit cards, issued on demand:
+
+- **Per-merchant card** — locked to one merchant by Visa/Mastercard merchant ID. If the merchant changes owner or runs a second charge under a different MID, the card declines.
+- **Amount-bounded card** — caps total authorized amount. Exceeding the cap declines without deactivating.
+- **Expiry-bounded card** — auto-closes after a set duration, regardless of merchant activity.
+- **Use-once card** — single transaction, then closes automatically.
+
+Cancelling a card is a one-tap action. The subscription cannot renew because the payment instrument no longer exists.
+
+## Issuer partner
+
+Stripe Issuing, most likely. Reasons:
+
+- Katafract already holds a live Stripe account for platform billing.
+- Stripe Issuing handles the bank-partner relationship + money-services compliance.
+- Developer API surface is clean and matches the rest of the platform's Stripe integration.
+
+Alternative: Marqeta. More flexible but higher minimums and longer onboarding; we'd only switch if Stripe's policies materially constrained the product.
+
+## Regulatory reality
+
+US virtual-card issuance intersects with state money-services regulation. Running our own program (BIN sponsor + custodial accounts + KYC) takes 6-12 months and a compliance officer. Using Stripe Issuing means Stripe's bank partner is the legal issuer and we're the program operator — roughly 90% less regulatory overhead. We will ship via Stripe Issuing.
+
+Global expansion is TBD; Stripe Issuing is US + UK + EU only today. Residents of other countries will see a "coming soon" page.
+
+## Pricing model
+
+Candidate structure:
+
+- Sovereign tier includes N virtual cards/month (probably 10).
+- Overage: $0.50 per additional card or a "Sovereign+" add-on.
+- All transaction fees are cost-plus; no hidden margin on interchange.
+
+Locked-in when the product gets closer to ship.
+
+## Subscription audit side-effect
+
+Because Katafract sees where your virtual cards are charged, the app naturally becomes a subscription auditor — "you're paying $X/mo to services you forgot." The audit data never leaves your device. Cross-sell into MeridianMosaic (Plaid-backed personal finance history, sibling Mosaic-family brand) is possible but not automatic.
+
+## Target timeline
+
+Not committed. 6-8 weeks of solo founder work after Authenticator + Keyring are in flight.
+
+## Related
+
+- [Platform overview](/architecture/overview/)
+- [Sigil](/modules/sigil/) — gating lives in the token

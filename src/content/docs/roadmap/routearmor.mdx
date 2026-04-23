@@ -1,0 +1,53 @@
+---
+title: RouteArmor — per-app routing (roadmap)
+description: Route each app through a different VPN exit. Full implementation on Android and macOS, partial on iOS (OS limitations).
+---
+
+:::caution[Roadmap]
+RouteArmor is not shipped. This page describes what will ship, and — honestly — what will not.
+:::
+
+## What it will be
+
+A per-app traffic-routing layer that lets you set different VPN exits (or no VPN) per application:
+
+- Slack → United States
+- Signal → direct (no VPN)
+- Instagram → rotating EU exits every 4 hours
+- Banking app → direct (banks often block VPN ranges)
+- Everything else → default exit
+
+## Platform support — the honest version
+
+| Platform | Implementation | What you get |
+|---|---|---|
+| **Android** | Standard `VpnService` per-app allowlist/denylist | Full per-app routing. Trivial. |
+| **macOS** | Network Extension with per-app rules | Full per-app routing. Requires macOS 11+. |
+| **iOS** | Cannot be done for arbitrary apps. iOS restricts per-app VPN to MDM profiles. | Partial: (1) browser-level routing via a Safari Web Extension; (2) Shortcuts integration to toggle exits per invocation; (3) "route this app" prompt that swaps the default exit. Not arbitrary-app routing. |
+
+We will not ship iOS "per-app VPN" claims that the OS cannot deliver. Android and macOS get the real feature. iOS gets the honest subset.
+
+## Policies
+
+Route policies are JSON-serializable, syncable through Vaultyx, and human-readable:
+
+```jsonc
+[
+  { "match": { "bundle_id": "com.slack.slack" }, "exit": "ash" },
+  { "match": { "bundle_id": "org.signal.signal" }, "exit": "direct" },
+  { "match": { "bundle_id": "com.instagram.*" }, "exit": { "rotate": ["nbg1", "hel1"], "every_hours": 4 } },
+  { "match": { "bundle_id": "com.chase.mobile" }, "exit": "direct" },
+  { "default": true, "exit": "sovereign" }
+]
+```
+
+Apps managed by the Katafract client enforce the policy; apps outside the Katafract manager fall through to the OS default tunnel.
+
+## Target timeline
+
+Not committed. Android-first implementation aligns with the Wraith Android migration currently queued. Rough estimate: 1 week for Android + 2 weeks for macOS. iOS browser-extension + Shortcuts comes after.
+
+## Related
+
+- [WraithVPN](/modules/wraithvpn/)
+- [Sigil](/modules/sigil/) — Pro tier gating lives in the token claims

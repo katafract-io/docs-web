@@ -1,0 +1,57 @@
+---
+title: Katafract Enclave — developer documentation
+description: You don't connect to the internet. You operate inside your own Enclave. These docs describe the platform underneath.
+template: splash
+hero:
+  tagline: You don't connect to the internet. You operate inside your own Enclave.
+  actions:
+    - text: Platform overview
+      link: /architecture/overview/
+      icon: right-arrow
+      variant: primary
+    - text: GitHub
+      link: https://github.com/katafract-io
+      icon: external
+      variant: secondary
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+Katafract is a privacy platform. The apps you install — WraithVPN, Vaultyx, Haven, DocArmor, SafeOpen — are thin surfaces over a shared control plane that runs the network nodes, holds your identity tokens, replicates your encrypted storage, and exposes APIs the apps consume.
+
+These docs are for the people who want to see underneath.
+
+## Where to start
+
+<CardGrid>
+  <Card title="Platform architecture" icon="information">
+    A map of the whole surface: control plane, data plane, edge. [Start here](/architecture/overview/).
+  </Card>
+  <Card title="Threat model" icon="approve-check">
+    What Katafract defends against and what it does not. [Read the honest version](/architecture/threat-model/).
+  </Card>
+  <Card title="Sigil identity" icon="seti:lock">
+    The token primitive every app uses — no email, no password, no third-party IdP. [Dig in](/modules/sigil/).
+  </Card>
+  <Card title="Roadmap" icon="rocket">
+    Keyring, Authenticator, RouteArmor, virtual cards, disposable numbers — [what ships next](/roadmap/keyring/).
+  </Card>
+</CardGrid>
+
+## What's in the platform today
+
+| Module | Purpose | API status |
+|---|---|---|
+| **Sigil** | Zero-knowledge identity tokens backed by Zitadel | Internal — public SDK planned |
+| **Haven** | DoH DNS (AdGuard Home + OISD blocklists) on every Katafract node | Public DNS endpoints |
+| **WraithVPN** | WireGuard-based VPN via self-operated exit nodes | Internal provisioning API |
+| **Vaultyx** | Zero-knowledge encrypted storage over Garage S3 | Chunk/manifest API |
+| **Shards** | Garage S3 cluster behind `*.s3.objstore.io` | S3-compatible API |
+| **Artemis** | Control plane — provisions nodes, issues tokens, orchestrates subscriptions | Internal |
+
+## Conventions
+
+- Every code sample ships runnable. No pseudo-code.
+- API endpoints live at `api.katafract.com` unless prefixed otherwise.
+- Mesh-only services are labelled. If it references `100.64.0.0/10`, it is not reachable from the public internet.
+- We publish what ships. We don't document vaporware.

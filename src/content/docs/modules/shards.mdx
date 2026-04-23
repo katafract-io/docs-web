@@ -1,0 +1,77 @@
+---
+title: Shards — S3 cluster
+description: The Garage S3 cluster that backs Vaultyx and every other internal object-store consumer. Three nodes across three physical locations, replication factor 2.
+---
+
+Shards is the name of Katafract's object-storage cluster. It speaks the S3 API, runs Garage under the hood, and replicates every object across physically distinct zones.
+
+## Topology
+
+| Node | Mesh IP | S3 port | Zone | Capacity |
+|---|---|---|---|---|
+| fury | `100.64.0.4` | 3901 | us-central | 1.5 TB SSD |
+| atlas | `100.64.0.32` | 3901 | us-vin | 14.8 TB HDD |
+| hades | `100.64.0.30` | 3901 | ca-bhs | 14.8 TB HDD |
+
+- Replication factor: 2 (every object exists on two distinct zones).
+- Total raw: ~31 TB. Usable at rf=2: ~15 TB.
+- Layout version: 12.
+
+## Access
+
+External consumers reach Shards over:
+
+```
+https://<bucket>.s3.objstore.io
+```
+
+Proxied through nginx on argus to the Garage nodes (least-connections load balancing). TLS is Cloudflare edge; origin is nginx on argus.
+
+Internal (service-to-service) access uses the mesh IPs directly on port 3901.
+
+## Credentials
+
+S3 credentials are per-consumer and stored in Infisical under `prod/objstore`. Obtain a key by contacting the ops team — we do not currently expose a self-service key provisioning endpoint.
+
+Example access:
+
+```bash
+export AWS_ACCESS_KEY_ID=...
+export AWS_SECRET_ACCESS_KEY=...
+
+aws s3 ls --endpoint-url https://s3.objstore.io
+aws s3 cp file.bin s3://my-bucket/ --endpoint-url https://s3.objstore.io
+```
+
+Garage is S3-compatible but supports only a subset of the full S3 API. Notably absent:
+
+- Multi-part upload
+- S3 Select / Object Lambda
+- Cross-region replication (Garage does its own at the cluster layer)
+
+Notably present:
+
+- List / Put / Get / Delete / Head / Copy
+- Presigned URLs
+- Bucket policies + CORS
+- Server-side encryption (disabled by default; we encrypt client-side in Vaultyx anyway)
+
+## Dedicated clusters (Tartarus pattern)
+
+For customers who want their data on hardware they operate (Founder tier, enterprise pilots), we run the "standalone cluster" pattern: a Garage deployment with its own `rpc_secret`, its own admin token, its own zones, and **no connection** to the shared Shards cluster. See [project_tartarus_standalone_cluster.md](https://github.com/katafract-io/docs) for the operational notes — this is the pattern we want to productize as "Sovereign node" eventually.
+
+## Failure modes
+
+- **One zone offline** — writes continue at rf=2 as long as two other zones remain healthy. Reads continue from any surviving replica.
+- **Two zones offline** — writes stall (not enough replicas). Reads serve from the one remaining zone.
+- **Primary DB (argus) offline** — Vaultyx metadata lookups fail; object GETs that don't need metadata keep working.
+- **Admin API (port 3903) compromised** — attacker could rewrite cluster layout. Mitigation: admin token held only on artemis; port 3903 not exposed beyond mesh.
+
+## Monitoring
+
+Prometheus scrapes each Garage node's metrics endpoint. Grafana dashboard at `https://grafana.katafract.io/d/33ee85f3.../katafract-fleet` includes cluster health, per-zone used-space, and replication lag.
+
+## Related
+
+- [Vaultyx](/modules/vaultyx/) — primary consumer
+- [Platform overview](/architecture/overview/)

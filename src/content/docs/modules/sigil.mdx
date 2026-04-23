@@ -1,0 +1,114 @@
+---
+title: Sigil — identity
+description: Zero-knowledge identity tokens for the Katafract platform. No email + password. No third-party IdP. One token per user, bound to devices, carried across every Katafract app.
+---
+
+Sigil is the identity layer every Katafract app shares. It answers the question "which subscription, which device, which tier" without the server ever holding a password for you.
+
+## What Sigil is not
+
+- It is not an email + password login system.
+- It is not a social login wrapper.
+- It is not a password manager (that's [Keyring](/roadmap/keyring/), which builds on Sigil).
+- It is not a single-sign-on you configure. It's always on.
+
+## What Sigil is
+
+A Sigil token is a signed bearer credential carrying:
+
+```text
+{
+  "sub": "<user id — a UUIDv7>",
+  "tier": "haven|enclave|sovereign|founder",
+  "is_founder": false,
+  "brand": ["wraith", "vaultyx", "docarmor", ...],
+  "device_id": "<opaque device hash>",
+  "iss": "auth.katafract.com",
+  "iat": 1735024831,
+  "exp": 1743973231
+}
+```
+
+Signed by a Zitadel instance running on artemis. The signing key is held by Zitadel; Katafract services verify signatures against its public JWKS.
+
+## How a user gets a token
+
+```
+ ┌─────────────┐   1. Stripe checkout OR    ┌──────────────────┐
+ │             │      StoreKit purchase      │                  │
+ │   Client    ├────────────────────────────►│   Artemis API    │
+ │   (any app) │                              │  api.katafract.* │
+ │             │◄────── 2. Magic-link ────────┤                  │
+ └─────────────┘         or token paste       └──────────────────┘
+        │                                              │
+        │ 3. Token stored in iOS keychain              │
+        │    shared via App Group                      │
+        │    group.com.katafract.enclave               │
+        │                                              │
+        ▼                                              ▼
+ ┌─────────────┐                              ┌──────────────────┐
+ │ Every app   │                              │   Zitadel        │
+ │ on device   │◄────── signature check ──────┤  auth.katafract  │
+ │ reads token │                              │                  │
+ └─────────────┘                              └──────────────────┘
+```
+
+The token lives in the iOS keychain under an App Group entitlement. Any Katafract app on the same device reads the same token. No separate per-app login.
+
+On Android and Linux routers (when RouteArmor ships), the token is stored in whatever secure storage the platform provides — Keystore on Android, encrypted config file on routers.
+
+## Token revocation
+
+Tokens expire via `exp`. They can also be revoked early by inserting into the `revoked_tokens` table — artemis API checks both signature + revocation on every request. Revocation is one of:
+
+- **Subscription canceled** — webhook from Stripe fires; artemis revokes all tokens for that user.
+- **Device removed** — user removes a device from the portal; only that device's token is revoked.
+- **Security event** — manual revoke via admin dashboard.
+
+## The recovery phrase
+
+Because there is no password, a Sigil token is effectively a key material you cannot reconstruct without the device it was issued to. For users who want portability across device losses, Vaultyx-backed encrypted storage accepts a recovery phrase that seeds the user's master key. The recovery phrase never leaves the user's device unencrypted. The server stores only ciphertext encrypted under a key derived from that phrase.
+
+- 24 words.
+- User must transcribe and store it.
+- We cannot recover it for you. We know this is inconvenient. That is the point.
+
+## APIs
+
+| Endpoint | Purpose |
+|---|---|
+| `POST /v1/tokens/issue` | After Stripe webhook or StoreKit validation, issue a token bound to a device. |
+| `POST /v1/tokens/revoke` | Revoke a specific token or all tokens for a user. |
+| `GET /v1/tokens/me` | Return the current token's claims as JSON (for the app to display). |
+| `POST /v1/tokens/refresh` | Exchange a near-expired token for a new one with the same bindings. |
+
+Full request/response schemas live in [API reference](/modules/sigil/) once that page ships.
+
+## Sigil SDKs
+
+Planned, not shipped:
+
+- `katafract-sigil-swift` — iOS + macOS. Will expose a `SigilClient` that handles keychain storage, App Group sharing, and automatic refresh.
+- `katafract-sigil-kotlin` — Android, will mirror the Swift surface.
+
+Until the SDKs exist, apps read/write the shared keychain entry directly. See the sample in the [WraithVPN docs](/modules/wraithvpn/).
+
+## Why this design
+
+Proton, Bitwarden, Apple ID — all of these require an email address, which makes them a natural target for correlation. A user who signs up for Bitwarden with `alice@gmail.com` is thereafter tied to that email for the lifetime of the account. Katafract's position is that the cleanest way to not leak a user's identity is to never hold one in the first place. Sigil tokens carry **what the user paid for** and **which device holds them** — nothing else.
+
+Trade-offs we accept:
+- Account recovery without a recovery phrase is impossible. If you lose the device and lose the phrase, the account is gone.
+- Customer support cannot verify you by asking for an email. We verify tokens. If you need help, email support from a device that holds a working token and we will help you through the app.
+
+Trade-offs we decline:
+- Holding your email "just for recovery." No.
+- Offering password reset via SMS. No.
+- Integrating with Google/Apple/Microsoft sign-in. No.
+
+## Related
+
+- [Platform overview](/architecture/overview/)
+- [Vaultyx storage](/modules/vaultyx/) — where your recovery phrase seeds your master key
+- [Keyring](/roadmap/keyring/) — Sigil-backed password manager (roadmap)
+- [Authenticator](/roadmap/authenticator/) — TOTP with Vaultyx sync (roadmap)

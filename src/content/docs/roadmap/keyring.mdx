@@ -1,0 +1,40 @@
+---
+title: Keyring — password manager (roadmap)
+description: A Bitwarden-equivalent password manager built on Sigil identity and Vaultyx storage. Planned, not shipped.
+---
+
+:::caution[Roadmap]
+Keyring is not shipped. This page describes what will ship, not what exists today. Nothing below is callable via API yet.
+:::
+
+## What it will be
+
+A cross-platform password manager that:
+
+- Shares identity with every other Katafract app via Sigil — no second email + password to remember.
+- Stores the encrypted vault in Vaultyx — same zero-knowledge posture, same replication.
+- Ships as iOS / macOS / Android + Safari / Chrome / Firefox extensions.
+- Integrates with AutoFill (iOS Password AutoFill, macOS AutoFill, Android Accessibility Service).
+
+Bundle: `com.katafract.keyring`. Pricing: included in Enclave and Sovereign tiers — no separate purchase.
+
+## Why not just recommend Bitwarden
+
+Bitwarden is good. For users who already have one Katafract subscription, requiring them to create a second Bitwarden account — with its own email, recovery workflow, billing, and threat model — increases the number of things they have to trust. Keyring eliminates that by building on primitives we already ship.
+
+## What it needs before it can ship
+
+- A shared **secret envelope** SPM module (working name `KatafractSecretEnvelope`) that Vaultyx + Keyring + Authenticator can all use. Extracting the current Vaultyx encryption into a reusable package is sprint 1.
+- A browser-extension build pipeline. Extensions have their own pain points (MV3 service workers, content-security policies, storefront review).
+- A password-import shape compatible with Bitwarden, 1Password, LastPass, Apple Passwords, and Chrome's built-in exporter.
+- Clipboard + AutoFill integration per platform.
+
+## Target timeline
+
+Not committed. Rough estimate from the growth-playbook memo: 3 months of solo founder work after Authenticator ships (which is sprint 1 of the "secret envelope" extraction).
+
+## Related
+
+- [Sigil](/modules/sigil/) — identity layer Keyring reuses
+- [Vaultyx](/modules/vaultyx/) — storage layer Keyring reuses
+- [Authenticator](/roadmap/authenticator/) — ships before Keyring, same secret-envelope module

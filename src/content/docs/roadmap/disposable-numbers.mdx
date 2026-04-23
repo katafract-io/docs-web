@@ -1,0 +1,62 @@
+---
+title: Disposable phone numbers (roadmap)
+description: Throwaway phone numbers with voice + SMS forwarding. Planned via a SIP partner. Longest regulatory path of the roadmap.
+---
+
+:::caution[Roadmap]
+Disposable numbers are not shipped. This page describes the intended product, not live functionality.
+:::
+
+## What it will be
+
+On-demand phone numbers the user can spin up, bind to a specific service, and throw away when the service starts spamming. Unlike prepaid burner SIMs, these live entirely in the app:
+
+- Numbers provisioned from Twilio / Telnyx / Bandwidth (SIP providers).
+- Incoming voice forwards to the user's real number, OR stays in the app as voicemail-only.
+- Incoming SMS stays in the app OR forwards to the user's real number as a push notification.
+- Outbound calls and texts use the disposable number as caller ID.
+
+## Provider selection
+
+- **Telnyx** — cheapest per-number, best programmable-routing API. Likely pick.
+- **Twilio** — most documentation, widest coverage, priciest. Possible for non-US.
+- **Bandwidth** — cleanest compliance story (CNAM, E911). Use if we need enterprise-grade posture later.
+
+Starting with Telnyx for the proof of concept.
+
+## Regulatory reality
+
+Every country has its own rules:
+
+- **US**: E911 routing, CNAM registration, number portability. Non-trivial but solved by the SIP partner.
+- **EU**: GDPR on call/SMS metadata. If we log anything, we must let users export and delete. Design assumes encryption at rest with user-held keys so we *cannot* decrypt without cooperation.
+- **Other**: Ship US + EU first; everything else is "coming soon."
+
+## Privacy architecture
+
+This is the trickiest module in the roadmap. A forwarding service inherently sees the phone number you forwarded from and the one you forwarded to. That metadata is a liability.
+
+Design principles:
+
+- **Metadata encrypted at rest** under a key the user controls. The server can route a live event (incoming SMS → forward to device X) because the event payload contains the user's routing key, which is decryptable only at the edge of the event. The persisted logs are ciphertext.
+- **No call/SMS content stored on our servers.** Voice + SMS is proxied in-session; we keep "number Y rang at timestamp Z" ciphertext and nothing else.
+- **Honest retention**: 30 days of encrypted metadata by default; user can shorten or disable.
+
+## Pricing model
+
+Candidate:
+
+- Sovereign tier includes 3 numbers + an inclusive allowance of forwarded minutes and SMS.
+- Overage: cost-plus from SIP-partner invoices, no hidden margin.
+- Number rental is per-month ($1-2 typically for US, more for international).
+
+Locked in when the product is closer to ship.
+
+## Target timeline
+
+Not committed. Last of the five roadmap modules because of regulatory depth + commercial risk. Earliest: 6 months out.
+
+## Related
+
+- [Platform overview](/architecture/overview/)
+- [Virtual cards](/roadmap/virtual-cards/) — sibling module, similar compliance pattern

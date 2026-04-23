@@ -1,0 +1,92 @@
+---
+title: Haven — DNS
+description: Encrypted DNS resolution with ad + tracker + malware blocking, applied at the resolver. Free, no account required, bundled with every paid tier.
+---
+
+Haven is Katafract's DNS layer. AdGuard Home behind DoH (DNS-over-HTTPS) and DoT (DNS-over-TLS) on every WraithGate node, with the OISD blocklist for ad/tracker/malware + AdGuard DNS filter on top.
+
+## Endpoints
+
+| Protocol | Endpoint | Port |
+|---|---|---|
+| DoH | `https://dns.katafract.com/dns-query` | 443 |
+| DoT | `tls://dns.katafract.com` | 853 |
+| DoH3 (experimental) | `h3://dns.katafract.com/dns-query` | 443 |
+
+All endpoints resolve via GeoDNS to the nearest WraithGate node. If you prefer a specific region, use the per-region name:
+
+- `dns-eu.katafract.com`
+- `dns-us.katafract.com`
+- `dns-apac.katafract.com`
+
+## Tiers
+
+Haven's default posture is the STANDARD tier (blocks ads, trackers, phishing). Two additional tiers are available to Enclave/Sovereign subscribers via the in-app DNS picker:
+
+- **LOW** — conservative blocking. Useful when STANDARD is breaking a site.
+- **STRICT** — adds known-scam-adjacent lists + cryptojacking + YouTube trackers. May break ad-supported apps.
+
+Free Haven users get STANDARD. The tier picker ships inside Wraith iOS.
+
+## Client setup
+
+### iOS / macOS
+
+Settings → General → VPN, DNS & Device Management → DNS → Encrypted → pick "Haven (Katafract)" if the profile is installed, or paste the DoH endpoint.
+
+Prefer the shipped profile:
+
+```
+https://katafract.com/haven/profile.mobileconfig
+```
+
+Profile installs as a DNS configuration (not a VPN). Removable from the same Settings pane.
+
+### Android 9+
+
+Settings → Network & Internet → Private DNS → select "Hostname of Private DNS provider" → enter:
+
+```
+dns.katafract.com
+```
+
+### Browser-specific
+
+If your browser has its own DoH resolver (Firefox, Brave), configure per-browser:
+
+```
+https://dns.katafract.com/dns-query
+```
+
+### OpenWRT / Mikrotik / Ubiquiti
+
+Point your router's resolver at `dns.katafract.com` over DoT (port 853). Full recipe in [WraithVPN router provisioning](/modules/wraithvpn/).
+
+## What Haven blocks
+
+- Ad networks (Google Ads, Facebook Pixel, ad-tech ecosystem).
+- Third-party trackers.
+- Malware + phishing domains from threat feeds.
+- Cryptojacking (STRICT tier).
+
+What Haven does NOT block:
+- First-party analytics on the site you're visiting (e.g., a site's own server-side analytics).
+- DNS queries for domains that resolve to IPs that host malicious content but aren't flagged (IP-level blocking is not in scope for DNS).
+- Content your operating system considers "essential" (Apple push notifications, etc.) even on STRICT.
+
+## Architecture
+
+Each WraithGate node runs `adguardhome` as a systemd service, bound to its WireGuard interface IP + port 53 (and the public DoH/DoT proxy for the free tier). Upstreams are Quad9 DoH + Cloudflare DoH in parallel mode — Haven does not resolve recursively itself. We trust Quad9 and Cloudflare to not lie about records; we do not trust them to not log your query. Haven terminates the connection before the upstream sees your client IP.
+
+Blocklists are updated hourly from upstream feeds. Blocklist versions are logged to the Grafana fleet dashboard.
+
+## When not to use Haven
+
+- You need recursive DNS resolution you control end-to-end. Run your own unbound instead.
+- You need DNSSEC validation the resolver refuses to bypass. Haven validates DNSSEC upstream but serves the upstream's answer — run your own validator for belt-and-suspenders.
+- You need per-device split-horizon (your work domain resolves differently than the public internet). Not in scope.
+
+## Related
+
+- [Platform overview](/architecture/overview/)
+- [WraithVPN](/modules/wraithvpn/) — bundled DNS when connected via VPN

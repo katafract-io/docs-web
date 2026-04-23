@@ -1,0 +1,58 @@
+---
+title: Getting started
+description: How to read these docs, what an Enclave account looks like, and the one free thing you can set up in 60 seconds.
+---
+
+This site documents the Katafract platform for developers, integrators, and anyone who wants to see the architecture before they trust it. It is not marketing copy. If you need sales material it lives at [katafract.com](https://katafract.com).
+
+## What you get by reading the docs
+
+- A working mental model of how the pieces fit together: control plane on one server, data plane across a small fleet, edge nodes in a handful of cities.
+- The threat model — what Katafract was built to defend against, and what it cannot defend against.
+- API references for every public surface: Sigil tokens, Vaultyx storage, WraithVPN provisioning, Haven DNS tiers.
+- Roadmap pages for modules that are not live yet (Keyring, Authenticator, RouteArmor, virtual cards, disposable numbers). These describe what will ship, with timelines where they exist.
+
+## The one thing you can set up in 60 seconds
+
+[Haven DNS](/modules/haven/) is free, requires no account, and gives you immediate concrete value — encrypted DNS resolution with ad + tracker + malware blocking applied at the resolver.
+
+Add to iOS / macOS Settings → DNS → Encrypted → paste:
+
+```
+https://dns.katafract.com/dns-query
+```
+
+Same endpoint works on Android 9+ (Private DNS) and on any router that speaks DoH or DoT.
+
+## Accounts, tokens, devices
+
+Katafract does not use email + password. It uses tokens. Specifically:
+
+- A **Sigil token** is a signed bearer credential with tier + device bindings.
+- Tokens issue from `api.katafract.com` after you complete Stripe checkout or an in-app StoreKit purchase.
+- One token covers every app the platform ships. ExifArmor, ParkArmor, DocArmor, SafeOpen, Vaultyx, WraithVPN — all share the same token envelope via the iOS App Group `group.com.katafract.enclave`.
+- There is no "master password" to remember. There is a recovery phrase. Lose it and the cryptography does not care who you are.
+
+Read [Sigil — identity](/modules/sigil/) for the details.
+
+## Tiers
+
+| Tier | Price | What it does |
+|---|---|---|
+| Haven | Free | Encrypted DNS with blocklists |
+| Enclave | $8/mo or $64/yr | Haven + WraithVPN single-hop + all utility apps unlocked + 50 AI credits/mo |
+| Sovereign | $18/mo or $144/yr | Everything in Enclave + multi-hop VPN + 1 TB Vaultyx storage + cross-device sync |
+
+V1 tiers are grandfathered for existing subscribers and are not documented here. If you were subscribed before April 20, 2026, your original pricing and feature set persists; the app reads your token and respects it.
+
+## Support
+
+- Open an issue: [github.com/katafract-io](https://github.com/katafract-io)
+- Email: hello@katafract.com
+- Warrant canary: [katafract.com/canary.html](https://katafract.com/canary.html)
+
+## What this site is not
+
+- A marketing site.
+- A changelog. Ship notes live in the [journal](https://katafract.com/journal/) when that ships.
+- A forum. We do not run a community forum. Use GitHub issues for reproducible bugs, email for everything else.

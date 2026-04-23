@@ -1,0 +1,54 @@
+---
+title: Threat model
+description: What Katafract defends against and what it does not. The honest version.
+---
+
+:::note[Draft]
+This page is the short-form threat model for orientation. The full-length version is slated for [katafract.com/journal/](https://katafract.com) — L2-01 in the editorial calendar.
+:::
+
+## Adversary classes we consider
+
+| Class | Example | Katafract posture |
+|---|---|---|
+| **Passive observer on your local network** | Coffee-shop Wi-Fi sniffer | Defeated by WraithVPN (WireGuard) + Haven (DoH) + TLS for every catafract.com service. |
+| **Active MITM at your ISP** | ISP injecting ads or cert-pinning downgrade | Defeated by the same. Client pins Katafract endpoints. |
+| **DPI / anti-VPN at a state or corporate firewall** | China GFW, Iran restrictions, hotel DPI appliance | Partially defeated. Shadowsocks + v2ray-plugin is the fallback. AmneziaWG was deprecated in April 2026 in favor of SS-TLS. |
+| **Device compromise** | Malicious app / stolen device with unlocked biometric | Out of scope. If your device is compromised, the attacker operates as you. |
+| **Server compromise at Katafract** | Control plane breached | Token revocation + audit logs + secrets in Infisical limits blast radius. Vaultyx is zero-knowledge so server breach does not disclose file content. WireGuard config is regenerated per-session so a breach does not disclose past session keys. |
+| **Legal compulsion against Katafract** | Subpoena for user records | We can produce: subscription metadata (email, plan, billing country via Stripe). We cannot produce: content of encrypted files, DNS query history per user, VPN session contents. Warrant canary at `katafract.com/canary.html`. |
+| **State-level traffic correlation across jurisdictions** | Adversary that can observe both your entry and exit | Out of scope for any single-hop VPN. Multi-hop VPN in Sovereign moves the correlation window but does not eliminate it. If your threat model is nation-state correlation, use Tor. |
+
+## What the platform does NOT defend against
+
+- A malicious actor with physical access to an unlocked device.
+- A browser extension you installed.
+- Metadata inherent to a request (who are you talking to, how often, how big a payload).
+- Traffic-analysis attacks against Tor or anything resembling one. Katafract is not Tor and we do not claim it is.
+- Someone else being logged into your App Store account who downloads Katafract apps on their device. Subscription binds to Apple ID, not identity.
+
+## The receipts
+
+- **VPN nodes:** session logs disabled. `wg show` output is transient state in kernel memory. `journalctl` is rotated + cleared weekly. Node heartbeats to artemis carry aggregate counters (peer count, bytes transferred per interface), never per-peer payloads.
+- **DNS nodes:** AdGuard Home query log disabled. Statistics page shows aggregate counts only.
+- **Artemis API:** audit log of account actions (signup, plan change, token issue, device add/remove). Content-free.
+- **Argus Postgres:** rows for subscriptions, peers, tokens. Never queries, never file contents.
+- **Vaultyx:** server sees opaque chunk hashes + ciphertext bytes + encrypted filename blobs. Server does not hold a key capable of decrypting any of it.
+
+## How we test this
+
+- Before a new route ships on `artemis-api`, a reviewer greps the diff for SQL that lacks `AND user_id = %s` — the tenant-isolation rule caught a cross-tenant cascade-delete bug in April 2026 that was patched same-day.
+- Node configs are ansible-generated from one source of truth. Drift is detected by nightly `etckeeper` comparison.
+- Quarterly we publish aggregate transparency numbers (subscriber count, warrant count, canary update). Quarterly cadence is locked in the editorial calendar.
+
+## When to use something else
+
+- **If your adversary is a nation-state that can observe both your entry and exit**: use Tor, not WraithVPN.
+- **If you need provably plausible-deniable storage**: use VeraCrypt hidden volumes, not Vaultyx. Vaultyx is zero-knowledge but not deniable.
+- **If you are hosting content that could bring the platform under coordinated legal pressure**: use dedicated hosting you control. Katafract is not a publishing platform.
+
+## Related
+
+- [Warrant canary](https://katafract.com/canary.html)
+- [Platform overview](/architecture/overview/)
+- [Sigil — identity](/modules/sigil/)

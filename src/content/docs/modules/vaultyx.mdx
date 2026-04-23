@@ -1,0 +1,90 @@
+---
+title: Vaultyx — storage
+description: Zero-knowledge encrypted cloud storage. 1 TB per Sovereign subscriber. Server stores opaque chunks; only you hold the keys.
+---
+
+Vaultyx is Katafract's cloud storage layer. E2EE chunked storage over the Shards Garage S3 cluster, accessed through an iOS + macOS app, with Android on the roadmap.
+
+## What the server sees
+
+The server stores:
+
+- An opaque `file_id` (UUIDv7).
+- An encrypted `filename_enc` blob (AES-GCM).
+- A list of chunk hashes in manifest order.
+- The ciphertext chunks themselves (~4 MiB each).
+- Byte size per chunk and per file.
+- Timestamps (created, modified, last_accessed).
+
+The server **does not** store:
+
+- Plaintext filenames.
+- Folder structure in any decryptable form (folder names are also encrypted).
+- A key capable of decrypting any of the above.
+
+## Key hierarchy
+
+```
+Recovery phrase (24 words, user-held)
+        │
+        │ PBKDF2 / Argon2id
+        ▼
+  Master key (32 bytes)
+        │
+        │ HKDF per-folder with folder_id as info
+        ▼
+ Folder key (32 bytes, one per vault folder)
+        │
+        │ AES-GCM encrypt
+        ▼
+  Filename + chunk content
+```
+
+The master key never leaves the device in plaintext. The folder key is re-derived on demand; the server never sees it.
+
+When you add a new device, the existing device encrypts a copy of the master key under the new device's public key and posts it to a short-lived invite endpoint. The new device decrypts it and stores the master key in the keychain.
+
+## Chunking
+
+Files are split into 4 MiB chunks. Each chunk is AES-GCM encrypted under the folder key with a nonce derived from chunk index + file ID. The chunk hash is SHA-256 over the ciphertext. Chunks are addressed by hash and stored once per hash across the cluster (content-addressed, deduplicated across a single user's namespace).
+
+Uploads are serial today. Parallelization (`withTaskGroup` over 4 concurrent chunks) is on the Vaultyx roadmap — see Tier 2 in the [Sprint plan](https://katafract.com/journal/) when that post ships.
+
+## API
+
+| Endpoint | Purpose |
+|---|---|
+| `POST /v1/vault/files` | Create a new file (returns file_id + presigned chunk upload URLs) |
+| `PATCH /v1/vault/files/{id}` | Rename (encrypted filename) |
+| `PATCH /v1/vault/files/{id}/parent` | Move to a different folder |
+| `DELETE /v1/vault/files/{id}` | Soft-delete (moves to 30-day trash) |
+| `GET /v1/vault/files` | List files in a folder (server returns encrypted names) |
+| `POST /v1/vault/folders` | Create a folder |
+| `POST /v1/vault/reconcile` | Ask the server to reconcile client-known file IDs against the authoritative set (for orphan cleanup) |
+| `GET /v1/vault/meta` | Storage quota (used / limit) for the caller |
+
+All endpoints are `Authorization: Bearer <sigil-token>` + tenant-scoped by user_id — the server enforces that `file_id` is owned by the calling user before any operation.
+
+## Quota
+
+- Sovereign tier: 1 TB included.
+- Overage add-on: $4/mo per additional TB. No hard cap — you add TBs as needed.
+- Quota is computed as sum(chunk size) per user, updated atomically on upload/delete.
+
+## Recovery and failure modes
+
+- **Device lost, recovery phrase held**: install Vaultyx on a new device, enter the recovery phrase, everything decrypts.
+- **Device lost, recovery phrase lost**: data is unrecoverable. Katafract cannot decrypt your vault. This is the zero-knowledge guarantee; it applies to us too.
+- **Account canceled**: files remain on the server for 30 days (grace period) then are hard-deleted. We publish the cron job's schedule in the Grafana fleet dashboard.
+
+## Limitations we acknowledge
+
+- **Metadata timing.** The server sees when you upload a file and how big it is. An adversary with access to the server's logs could infer upload patterns even without seeing content. We truncate access logs to aggregate counters where possible.
+- **Cross-device sync conflicts.** The current resolver is last-writer-wins on manifest version. A shared-folder CRDT is on the roadmap.
+- **Not a backup tool.** Vaultyx is primary storage. If you need air-gapped backups, export periodically using the `garage object-get` CLI directly from a node, or use an S3 client against the Shards API.
+
+## Related
+
+- [Shards — S3 cluster](/modules/shards/)
+- [Sigil — identity](/modules/sigil/) — token + recovery phrase seeding
+- [Threat model](/architecture/threat-model/)

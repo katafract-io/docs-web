@@ -1,0 +1,69 @@
+---
+title: Platform architecture overview
+description: A one-page map of the Katafract platform — control plane, data plane, edge fleet, and the identity/storage/network primitives that bind them.
+---
+
+Katafract is organised along three planes that map cleanly onto three failure modes:
+
+- **Control plane** — one server. If it goes down, no new tokens can be issued and no subscription changes can be applied. Existing sessions keep working.
+- **Data plane** — Postgres + Redis + Garage S3. If the primary DB goes down, a hot standby promotes within 10 minutes. Object storage replicates across zones.
+- **Edge** — the VPN exit nodes and the Haven DNS resolvers. If one node fails, the client fails over to the next nearest. No single-node outage touches the rest.
+
+```
+                         ┌────────────────────────────────────────────┐
+   clients (apps)        │                                            │
+   ───────────────►      │   CONTROL PLANE (artemis)                  │
+                         │   ├─ Artemis API  (Sigil issue/revoke)      │
+                         │   ├─ Worker       (subscription reconciler) │
+                         │   └─ Scheduler    (node provisioning)       │
+                         │                                            │
+                         └──────────┬─────────────────────────────────┘
+                                    │ mesh only
+                                    ▼
+                         ┌─────────────────────────────────────────────┐
+                         │   DATA PLANE                                │
+                         │   ├─ argus       Postgres 17 primary        │
+                         │   ├─ kata-db-replica   streaming standby    │
+                         │   ├─ argus       Redis 7 (sessions, cache)  │
+                         │   └─ Shards      Garage S3 cluster (3 zone) │
+                         └──────────┬──────────────────────────────────┘
+                                    │ mesh only
+                                    ▼
+                         ┌─────────────────────────────────────────────┐
+                         │   EDGE (WraithGate + Haven)                 │
+                         │   10 VPN exit nodes across 8 cities         │
+                         │   AdGuard Home DNS bound to WG interface    │
+                         │   Peer isolation enforced server-side       │
+                         └─────────────────────────────────────────────┘
+```
+
+## Principles
+
+- **One subscription, one perimeter.** A Sigil token carries the tier and device bindings. Every app reads the same token envelope. Apps never see raw user credentials.
+- **End-to-end in the cryptographic sense, not the marketing sense.** Where Vaultyx claims zero-knowledge, it means the server stores opaque ciphertext chunks with opaque filenames. Filenames are encrypted. Folder structure is encrypted. The server knows chunk hashes and byte sizes.
+- **Peer isolation at the edge.** WireGuard clients cannot reach each other or the mesh. Server-side iptables enforce `wgX → eth0 accept; eth0 → wgX established,related; wgX → * drop`.
+- **Logs we do not keep, we cannot be forced to disclose.** VPN nodes keep zero session logs. DNS nodes strip query logging to aggregate counters only. Artemis API keeps audit logs for account actions (signup, plan change, token issue) — never content.
+
+## Why so few servers
+
+Katafract runs on ~15 machines. Two data-plane boxes, one control-plane box, ten edge nodes, plus a monitoring box and a few home-lab participants. The number is intentional. Every additional node is another thing that could be compromised, audited badly, or misconfigured. We scale by adding edge nodes; we do not scale the control plane horizontally.
+
+## When things fail
+
+- **Control plane down** → subscriptions cannot be issued or modified, and phones cannot be provisioned. The fleet keeps routing traffic unchanged. Degraded, not failed.
+- **DB primary down** → `kata-db-monitor` on the replica auto-promotes after 10 minutes. Apps reconnect seamlessly because the DNS points to `db.katafract.local` which flips.
+- **Edge node down** → clients that were routing through it see the WireGuard handshake time out. Wraith's client-side manager fails over to the next nearest node from the region list. Typical recovery: 15-30 seconds.
+- **Garage node down** → if it was holding a replica, the other replica serves. Writes gate on at least two healthy replicas; reads gate on at least one.
+
+## Security posture
+
+- SSH is key-only on every node. Root login is restricted to the 100.64.0.0/10 mesh on every edge node.
+- Secrets live in a self-hosted Infisical instance on artemis. No .env files on disk outside the machine identity credential they need to authenticate against Infisical.
+- Auto-updates run nightly via `unattended-upgrades` with staggered reboot windows so adjacent-region nodes never reboot at the same minute.
+- Prometheus + Alertmanager monitor the fleet; alerts fan out to a private Matrix room (`alerts`) and to email for the on-call person.
+
+## Next
+
+- [Threat model — in detail](/architecture/threat-model/)
+- [Sigil — identity token design](/modules/sigil/)
+- [Shards — S3 cluster topology](/modules/shards/)
