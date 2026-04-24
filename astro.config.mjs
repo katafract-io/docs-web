@@ -26,7 +26,7 @@ export default defineConfig({
           tag: 'script',
           attrs: {
             async: true,
-            src: 'https://pulse.katafract.io/js/pa-N65RPgou4djMK6sLPQnRu.js',
+            src: 'https://pulse.katafract.io/js/pa-2kHGqWksEcC0m22x_0-iQ.js',
           },
         },
         {
