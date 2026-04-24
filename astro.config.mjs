@@ -43,6 +43,32 @@ export default defineConfig({
           ],
         },
         {
+          label: 'Trust',
+          items: [
+            { label: 'Overview', slug: 'trust' },
+            { label: 'Infrastructure', slug: 'trust/infrastructure' },
+            { label: 'Logs policy', slug: 'trust/logs' },
+            { label: 'Retention', slug: 'trust/retention' },
+            { label: 'Incidents', slug: 'trust/incidents' },
+            { label: 'Bug bounty', slug: 'trust/bug-bounty' },
+          ],
+        },
+        {
+          label: 'Apps',
+          items: [
+            { label: 'All apps', slug: 'apps' },
+            { label: 'Wraith VPN', slug: 'apps/wraith/getting-started' },
+            { label: 'Vaultyx', slug: 'apps/vaultyx/getting-started' },
+            { label: 'Haven DNS', slug: 'apps/haven/getting-started' },
+            { label: 'SafeOpen', slug: 'apps/safeopen/getting-started' },
+            { label: 'DocArmor', slug: 'apps/docarmor/getting-started' },
+            { label: 'ExifArmor', slug: 'apps/exifarmor/getting-started' },
+            { label: 'ParkArmor', slug: 'apps/parkarmor/getting-started' },
+            { label: 'MeritMosaic', slug: 'apps/meritmosaic/getting-started' },
+            { label: 'AeroMosaic', slug: 'apps/aeromosaic/getting-started' },
+          ],
+        },
+        {
           label: 'Modules',
           items: [
             { label: 'Sigil — identity', slug: 'modules/sigil' },
@@ -60,6 +86,12 @@ export default defineConfig({
             { label: 'RouteArmor — per-app routing', slug: 'roadmap/routearmor' },
             { label: 'Virtual cards', slug: 'roadmap/virtual-cards' },
             { label: 'Disposable numbers', slug: 'roadmap/disposable-numbers' },
+          ],
+        },
+        {
+          label: 'Changelog',
+          items: [
+            { label: 'All changes', slug: 'changelog' },
           ],
         },
       ],
