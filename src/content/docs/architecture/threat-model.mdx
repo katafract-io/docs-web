@@ -11,7 +11,7 @@ This page is the short-form threat model for orientation. The full-length versio
 
 | Class | Example | Katafract posture |
 |---|---|---|
-| **Passive observer on your local network** | Coffee-shop Wi-Fi sniffer | Defeated by WraithVPN (WireGuard) + Haven (DoH) + TLS for every catafract.com service. |
+| **Passive observer on your local network** | Coffee-shop Wi-Fi sniffer | Defeated by WraithVPN (WireGuard) + Haven (DoH) + TLS for every katafract.com service. |
 | **Active MITM at your ISP** | ISP injecting ads or cert-pinning downgrade | Defeated by the same. Client pins Katafract endpoints. |
 | **DPI / anti-VPN at a state or corporate firewall** | China GFW, Iran restrictions, hotel DPI appliance | Partially defeated. Shadowsocks + v2ray-plugin is the fallback. AmneziaWG was deprecated in April 2026 in favor of SS-TLS. |
 | **Device compromise** | Malicious app / stolen device with unlocked biometric | Out of scope. If your device is compromised, the attacker operates as you. |

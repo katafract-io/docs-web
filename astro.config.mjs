@@ -20,17 +20,22 @@ export default defineConfig({
       ],
       customCss: ['./src/styles/katastyle.css'],
       head: [
+        // Privacy-friendly analytics by Plausible (self-hosted at pulse.katafract.io).
+        // Script path carries the site ID; no data-domain attribute needed in the CE v2 tracker.
         {
           tag: 'script',
           attrs: {
-            defer: true,
-            'data-domain': 'docs.katafract.io',
-            src: 'https://analytics.katafract.io/js/script.js',
+            async: true,
+            src: 'https://pulse.katafract.io/js/pa-N65RPgou4djMK6sLPQnRu.js',
           },
+        },
+        {
+          tag: 'script',
+          content: "window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()",
         },
       ],
       editLink: {
-        baseUrl: 'https://github.com/katafract-io/docs-site/edit/main/',
+        baseUrl: 'https://github.com/katafract-io/docs-web/edit/main/',
       },
       lastUpdated: true,
       sidebar: [
