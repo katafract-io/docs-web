@@ -7,6 +7,12 @@ This is the list of servers that actually handle your traffic or your files. Eve
 
 Katafract LLC owns the accounts on every provider. The providers host the hardware; we operate it. No third-party managed services sit in the data path for VPN, DNS, or file storage.
 
+:::note[Live map]
+The canonical live fleet map is rendered from the internal node registry on `admin.katafract.io` (Katafract-operator access only). The table below is a public snapshot refreshed by the `katafract-audit` pipeline — it should never drift from admin more than one deploy cycle. If you see a gap, tell us at `security@katafract.com`.
+
+Public verification artifacts live on our GitHub org: [`github.com/katafract-io`](https://github.com/katafract-io). The node bootstrap script + AGH config are visible there.
+:::
+
 ## Current WraithGate fleet
 
 Each node runs WireGuard (`wg1`, UDP 51821) and Haven (AdGuard Home bound to the WG interface). Peer isolation is enforced server-side: clients can reach the internet but not each other and not the mesh.
