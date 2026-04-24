@@ -20,8 +20,8 @@ export default defineConfig({
       ],
       customCss: ['./src/styles/katastyle.css'],
       head: [
+        { tag: 'link', attrs: { rel: 'stylesheet', href: '/fonts.css' } },
         // Privacy-friendly analytics by Plausible (self-hosted at pulse.katafract.io).
-        // Script path carries the site ID; no data-domain attribute needed in the CE v2 tracker.
         {
           tag: 'script',
           attrs: {

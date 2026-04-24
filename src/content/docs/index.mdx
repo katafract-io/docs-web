@@ -2,51 +2,78 @@
 title: Katafract Enclave — developer documentation
 description: You don't connect to the internet. You operate inside your own Enclave. These docs describe the platform underneath.
 template: splash
-hero:
-  tagline: You don't connect to the internet. You operate inside your own Enclave.
-  actions:
-    - text: Platform overview
-      link: /architecture/overview/
-      icon: right-arrow
-      variant: primary
-    - text: GitHub
-      link: https://github.com/katafract-io
-      icon: external
-      variant: secondary
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+<div class="kata-hero">
+  <div class="kata-hero__inner">
+    <div class="kata-hero__eyebrow">docs.katafract.io — Developer Documentation</div>
+    <h1 class="kata-hero__title">The platform <em>underneath</em><br />the apps you install.</h1>
+    <p class="kata-hero__sub">
+      Sigil identity. Haven DNS. WraithVPN. Vaultyx encrypted storage. Shards object store.
+      Thin apps, heavy infrastructure — and nothing to betray.
+    </p>
+    <div class="kata-hero__pills">
+      <span class="kata-pill">AES-256-GCM</span>
+      <span class="kata-pill">WireGuard</span>
+      <span class="kata-pill">Zero-knowledge</span>
+      <span class="kata-pill kata-pill--magenta">No behavior tracking</span>
+      <span class="kata-pill kata-pill--magenta">No cookies</span>
+    </div>
+    <div class="kata-cta-row">
+      <a class="kata-btn" href="/architecture/overview/">Platform overview →</a>
+      <a class="kata-btn kata-btn--ghost" href="/trust/">Trust &amp; transparency</a>
+    </div>
+  </div>
+</div>
 
 Katafract is a privacy platform. The apps you install — WraithVPN, Vaultyx, Haven, DocArmor, SafeOpen — are thin surfaces over a shared control plane that runs the network nodes, holds your identity tokens, replicates your encrypted storage, and exposes APIs the apps consume.
 
 These docs are for the people who want to see underneath.
 
-## Where to start
+## Start here
 
-<CardGrid>
-  <Card title="Platform architecture" icon="information">
-    A map of the whole surface: control plane, data plane, edge. [Start here](/architecture/overview/).
-  </Card>
-  <Card title="Threat model" icon="approve-check">
-    What Katafract defends against and what it does not. [Read the honest version](/architecture/threat-model/).
-  </Card>
-  <Card title="Sigil identity" icon="seti:lock">
-    The token primitive every app uses — no email, no password, no third-party IdP. [Dig in](/modules/sigil/).
-  </Card>
-  <Card title="Roadmap" icon="rocket">
-    Keyring, Authenticator, RouteArmor, virtual cards, disposable numbers — [what ships next](/roadmap/keyring/).
-  </Card>
-</CardGrid>
+<ul class="kata-grid">
+  <li><a class="kata-card" href="/architecture/overview/">
+    <span class="kata-card__eyebrow">Architecture</span>
+    <h3>Platform overview</h3>
+    <p>The whole map — control plane, data plane, edge — and how they connect.</p>
+  </a></li>
+  <li><a class="kata-card" href="/architecture/threat-model/">
+    <span class="kata-card__eyebrow">Threat model</span>
+    <h3>What we defend against</h3>
+    <p>What Katafract defends against, what it does not, and what we'd lie about if we could.</p>
+  </a></li>
+  <li><a class="kata-card" href="/trust/">
+    <span class="kata-card__eyebrow">Trust</span>
+    <h3>Logs, retention, incidents</h3>
+    <p>Exact logging and retention policy. Canary. Incident history. Bug bounty.</p>
+  </a></li>
+  <li><a class="kata-card" href="/modules/sigil/">
+    <span class="kata-card__eyebrow">Identity</span>
+    <h3>Sigil tokens</h3>
+    <p>Our identity primitive. No email, no password, no third-party IdP. How the token actually works.</p>
+  </a></li>
+  <li><a class="kata-card" href="/modules/vaultyx/">
+    <span class="kata-card__eyebrow">Storage</span>
+    <h3>Vaultyx internals</h3>
+    <p>Client-side encryption, FastCDC chunking, manifest-keyed uploads, cross-device replication.</p>
+  </a></li>
+  <li><a class="kata-card" href="/roadmap/keyring/">
+    <span class="kata-card__eyebrow">Roadmap</span>
+    <h3>What ships next</h3>
+    <p>Keyring, Authenticator, RouteArmor, virtual cards, disposable numbers.</p>
+  </a></li>
+</ul>
 
-## What's in the platform today
+## Platform today
 
 | Module | Purpose | API status |
 |---|---|---|
 | **Sigil** | Zero-knowledge identity tokens backed by Zitadel | Internal — public SDK planned |
 | **Haven** | DoH DNS (AdGuard Home + OISD blocklists) on every Katafract node | Public DNS endpoints |
 | **WraithVPN** | WireGuard-based VPN via self-operated exit nodes | Internal provisioning API |
-| **Vaultyx** | Zero-knowledge encrypted storage over Garage S3 | Chunk/manifest API |
-| **Shards** | Garage S3 cluster behind `*.s3.objstore.io` | S3-compatible API |
+| **Vaultyx** | Zero-knowledge encrypted storage over Garage S3 | Chunk / manifest API |
+| **Shards** | Garage S3 cluster behind `*.s3.objstore.io` | S3-compatible |
 | **Artemis** | Control plane — provisions nodes, issues tokens, orchestrates subscriptions | Internal |
 
 ## Conventions

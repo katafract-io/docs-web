@@ -1,105 +1,427 @@
-/* Katafract brand tokens — applied over Starlight's defaults.
-   Palette: kataNavy deep background · kataIce neutral text · kataGold hairline/accent ·
-   kataSapphire CTAs · kataChampagne for sealed/success motifs. */
+/* ============================================================
+   Katafract Enclave — docs.katafract.io
+   Theme overrides for Starlight. Matches katafract.com brand.
+   Palette: bg #050510, cyan #00F0FF, magenta #FF006E.
+   Fonts: Cormorant Garamond (display) · DM Sans (body) · JetBrains Mono (mono).
+   ============================================================ */
 
-:root {
-  --sl-color-white: #f4ede0;            /* kataIce */
-  --sl-color-gray-1: #e5ddd0;
-  --sl-color-gray-2: #c3bbae;
-  --sl-color-gray-3: #938d82;
-  --sl-color-gray-4: #5f5b53;
-  --sl-color-gray-5: #2a241c;           /* kataMidnight */
-  --sl-color-gray-6: #1a150f;
-  --sl-color-black: #0a0a0f;            /* kataNavy */
+/* Fonts are loaded by Starlight's head tag — see astro.config.mjs */
 
-  --sl-color-accent: #0b4f9e;           /* kataSapphire */
-  --sl-color-accent-high: #d4c58a;      /* kataChampagne */
-  --sl-color-accent-low: #0a1e3f;
-
-  --sl-color-text-accent: #c9a961;      /* kataGold */
-
-  --sl-font: 'DM Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  --sl-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  --sl-font-serif: 'Cormorant Garamond', ui-serif, Georgia, serif;
-}
-
-:root[data-theme='dark'] {
-  --sl-color-bg: #0a0a0f;
-  --sl-color-bg-nav: #0d1020;
-  --sl-color-bg-sidebar: #0a0a0f;
-  --sl-color-bg-accent: var(--sl-color-accent-low);
-  --sl-color-hairline: #1c1d2c;
-  --sl-color-hairline-light: #2a2a38;
-  --sl-color-hairline-shade: #14151e;
-  --sl-color-text: #f4ede0;
-  --sl-color-text-invert: #0a0a0f;
-}
-
+:root,
+:root[data-theme='dark'],
 :root[data-theme='light'] {
-  --sl-color-bg: #f4ede0;
-  --sl-color-bg-nav: #e9dfcd;
-  --sl-color-bg-sidebar: #f4ede0;
-  --sl-color-text: #0a0a0f;
-  --sl-color-text-invert: #f4ede0;
-  --sl-color-hairline: #c9a961;
-  --sl-color-hairline-light: #d8b87a;
+  /* Brand tokens (shared with katafract.com) */
+  --k-bg:      #050510;
+  --k-bg2:     #0a0a14;
+  --k-bg3:     #0e0e1c;
+  --k-border:  rgba(100,100,120,0.18);
+  --k-border2: rgba(100,100,120,0.08);
+  --k-cyan:    #00F0FF;
+  --k-magenta: #FF006E;
+  --k-text:    #EBF0F7;
+  --k-dim:     #A8B0C0;      /* slightly brighter than katafract.com's --dim for doc readability */
+  --k-dim2:    #5c6478;
+
+  /* Starlight token overrides (force dark-brand everywhere) */
+  --sl-color-bg:              var(--k-bg);
+  --sl-color-bg-nav:          rgba(5,5,15,0.92);
+  --sl-color-bg-sidebar:      var(--k-bg2);
+  --sl-color-bg-inline-code:  rgba(0,240,255,0.07);
+  --sl-color-bg-accent:       var(--k-cyan);
+
+  --sl-color-text:            var(--k-text);
+  --sl-color-text-accent:     var(--k-cyan);
+  --sl-color-text-invert:     var(--k-bg);
+  --sl-color-white:           var(--k-text);
+  --sl-color-gray-1:          #F0F4FA;
+  --sl-color-gray-2:          #D8DEE9;
+  --sl-color-gray-3:          #C0C8D8;
+  --sl-color-gray-4:          var(--k-dim);
+  --sl-color-gray-5:          #70788A;
+  --sl-color-gray-6:          var(--k-dim2);
+  --sl-color-gray-7:          #33384A;
+  --sl-color-black:           var(--k-bg);
+
+  --sl-color-hairline:        var(--k-border);
+  --sl-color-hairline-light:  var(--k-border2);
+  --sl-color-hairline-shade:  var(--k-border);
+
+  --sl-color-accent:          var(--k-cyan);
+  --sl-color-accent-high:     var(--k-magenta);
+  --sl-color-accent-low:      rgba(0,240,255,0.08);
+
+  --sl-font:       'DM Sans', system-ui, -apple-system, sans-serif;
+  --sl-font-mono:  'JetBrains Mono', ui-monospace, 'SF Mono', Consolas, monospace;
+  --sl-font-serif: 'Cormorant Garamond', Georgia, serif;
+
+  --sl-text-base:    16px;
+  --sl-line-height:  1.7;
+  --sl-sidebar-width: 18rem;
+  --sl-content-width: 52rem;
 }
 
-/* Serif display headings — matches the main katafract.com hero treatment. */
+/* Force dark-only. */
+:root { color-scheme: dark; }
+
+html, body {
+  background: var(--k-bg);
+  color: var(--k-text);
+  font-family: var(--sl-font);
+}
+
+/* ── Headings ───────────────────────────────────────────── */
 .sl-markdown-content h1,
-.sl-markdown-content h2 {
+.sl-markdown-content h2,
+.sl-markdown-content h3 {
   font-family: var(--sl-font-serif);
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: -0.01em;
+  color: var(--k-text);
 }
-
 .sl-markdown-content h1 {
-  font-size: 2.4rem;
+  font-size: clamp(2.1rem, 4vw, 2.75rem);
   line-height: 1.15;
-  border-bottom: 1px solid var(--sl-color-text-accent);
-  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--k-border);
+  padding-bottom: 0.6rem;
+  margin-bottom: 1rem;
 }
-
 .sl-markdown-content h2 {
-  font-size: 1.8rem;
+  font-size: 1.85rem;
   line-height: 1.2;
-  margin-top: 2.5rem;
+  margin-top: 2.75rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid var(--k-border2);
+}
+.sl-markdown-content h3 {
+  font-size: 1.3rem;
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
 }
 
-/* Inline code + code blocks — keep the operator-grade monospace vibe. */
+/* ── Body ──────────────────────────────────────────────── */
+.sl-markdown-content p,
+.sl-markdown-content li {
+  line-height: 1.75;
+  color: var(--k-text);
+}
+.sl-markdown-content p + p { margin-top: 1rem; }
+.sl-markdown-content strong,
+.sl-markdown-content b { color: var(--k-text); font-weight: 600; }
+.sl-markdown-content em { color: var(--k-cyan); font-style: italic; }
+
+/* ── Links ─────────────────────────────────────────────── */
+a { color: var(--k-cyan); text-decoration: none; }
+a:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--k-magenta);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+.sl-markdown-content a { color: var(--k-cyan); font-weight: 500; }
+
+/* External-link arrow */
+.sl-markdown-content a[href^='http']:not([href*='docs.katafract.io'])::after {
+  content: ' →';
+  color: var(--k-magenta);
+  font-weight: 600;
+}
+
+/* ── Code ──────────────────────────────────────────────── */
+code, pre { font-family: var(--sl-font-mono); font-size: 0.92em; }
 .sl-markdown-content :not(pre) > code {
-  background: var(--sl-color-bg-accent);
-  color: var(--sl-color-accent-high);
-  border: 1px solid var(--sl-color-hairline);
-  padding: 0.125rem 0.375rem;
+  background: rgba(0,240,255,0.07);
+  border: 1px solid rgba(0,240,255,0.2);
+  color: var(--k-cyan);
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+  font-size: 0.86em;
+}
+.sl-markdown-content pre {
+  background: var(--k-bg3);
+  border: 1px solid var(--k-border);
+  border-radius: 10px;
+  padding: 1.1rem 1.25rem;
+}
+
+/* ── Tables ────────────────────────────────────────────── */
+.sl-markdown-content table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--k-border);
+  border-radius: 10px;
+  overflow: hidden;
+  font-size: 0.92rem;
+  margin: 1.25rem 0;
+}
+.sl-markdown-content th {
+  background: var(--k-bg2);
+  color: var(--k-text);
+  font-family: var(--sl-font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.85rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--k-border);
+}
+.sl-markdown-content td {
+  padding: 0.85rem 1rem;
+  border-top: 1px solid var(--k-border2);
+  color: var(--k-text);
+  line-height: 1.6;
+}
+.sl-markdown-content tr:first-child td { border-top: none; }
+
+/* ── Asides ────────────────────────────────────────────── */
+.starlight-aside { border-left-width: 3px !important; border-radius: 0 10px 10px 0; }
+.starlight-aside--note    { border-left-color: var(--k-cyan)    !important; background: rgba(0,240,255,0.05) !important; }
+.starlight-aside--tip     { border-left-color: var(--k-magenta) !important; background: rgba(255,0,110,0.05) !important; }
+.starlight-aside--caution { border-left-color: #FFB800          !important; background: rgba(255,184,0,0.05) !important; }
+.starlight-aside--danger  { border-left-color: #FF4860          !important; background: rgba(255,72,96,0.05) !important; }
+
+.sl-markdown-content blockquote {
+  border-left: 3px solid var(--k-magenta);
+  background: rgba(255,0,110,0.04);
+  padding: 1rem 1.15rem;
+  margin: 1.25rem 0;
+  border-radius: 0 10px 10px 0;
+  color: var(--k-text);
+}
+
+/* ── Header / nav ─────────────────────────────────────── */
+header.header {
+  background: rgba(5,5,15,0.92) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--k-border);
+}
+.site-title {
+  font-family: var(--sl-font-serif);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--k-text);
+  font-size: 1.15rem;
+}
+
+/* ── Sidebar ──────────────────────────────────────────── */
+.sidebar-content a {
+  color: var(--k-dim);
+  font-size: 0.9rem;
+  transition: color 0.15s, background 0.15s;
   border-radius: 4px;
 }
-
-/* Gold-hairline accents on quote blocks and admonitions. */
-.sl-markdown-content blockquote {
-  border-left: 2px solid var(--sl-color-text-accent);
-  background: rgba(201, 169, 97, 0.05);
-  padding: 0.75rem 1rem;
+.sidebar-content a:hover {
+  color: var(--k-text);
+  background: rgba(0,240,255,0.05);
+  text-decoration: none;
+}
+.sidebar-content a[aria-current='page'] {
+  color: var(--k-cyan);
+  background: rgba(0,240,255,0.1);
+  font-weight: 500;
+}
+.sidebar-content .large,
+.sidebar-content summary > .large {
+  font-family: var(--sl-font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--k-magenta);
 }
 
-/* Sidebar eyebrow group labels — gold monospace, same treatment as main site. */
-.sidebar-content .group-label > .large {
+/* ── Right rail ToC ───────────────────────────────────── */
+starlight-toc nav a {
+  color: var(--k-dim);
+  font-size: 0.82rem;
+  padding: 0.35rem 0.75rem;
+  border-left: 2px solid transparent;
+  transition: all 0.15s;
+}
+starlight-toc nav a:hover {
+  color: var(--k-text);
+  border-left-color: var(--k-border);
+}
+starlight-toc nav a[aria-current='true'] {
+  color: var(--k-cyan);
+  border-left-color: var(--k-cyan);
+  background: rgba(0,240,255,0.05);
+}
+
+/* ── Prev/next pagination cards ──────────────────────── */
+.pagination-links a {
+  background: var(--k-bg2);
+  border: 1px solid var(--k-border);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
+}
+.pagination-links a:hover {
+  border-color: var(--k-cyan);
+  background: rgba(0,240,255,0.04);
+  transform: translateY(-1px);
+  text-decoration: none;
+}
+
+/* ── Custom components used by index.mdx hero + cards ── */
+.kata-hero {
+  position: relative;
+  margin: -2rem -1.25rem 2.5rem;
+  padding: 4rem 1.5rem 3rem;
+  background:
+    radial-gradient(ellipse at top left, rgba(0,240,255,0.10), transparent 55%),
+    radial-gradient(ellipse at bottom right, rgba(255,0,110,0.08), transparent 60%),
+    linear-gradient(180deg, var(--k-bg2) 0%, var(--k-bg) 100%);
+  border-bottom: 1px solid var(--k-border);
+  overflow: hidden;
+}
+.kata-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(100,100,120,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(100,100,120,0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask: radial-gradient(ellipse at center, black 45%, transparent 80%);
+  -webkit-mask: radial-gradient(ellipse at center, black 45%, transparent 80%);
+  pointer-events: none;
+}
+.kata-hero__inner { position: relative; max-width: 48rem; margin: 0 auto; }
+.kata-hero__eyebrow {
+  font-family: var(--sl-font-mono);
+  font-size: 0.72rem;
+  color: var(--k-magenta);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+.kata-hero__title {
+  font-family: var(--sl-font-serif);
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--k-text);
+  margin-bottom: 1rem;
+  letter-spacing: -0.01em;
+  padding: 0;
+  border: none;
+}
+.kata-hero__title em { font-style: italic; color: var(--k-cyan); }
+.kata-hero__sub {
+  font-size: 1.1rem;
+  color: var(--k-dim);
+  line-height: 1.65;
+  max-width: 40rem;
+  margin-bottom: 1.75rem;
+}
+.kata-hero__pills { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.kata-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   font-family: var(--sl-font-mono);
   font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.25em;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(0,240,255,0.07);
+  border: 1px solid rgba(0,240,255,0.22);
+  color: var(--k-cyan);
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--sl-color-text-accent);
+}
+.kata-pill--magenta {
+  background: rgba(255,0,110,0.07);
+  border-color: rgba(255,0,110,0.22);
+  color: var(--k-magenta);
 }
 
-/* External-link arrow in gold. */
-.sl-markdown-content a[href^='http']::after {
-  content: ' →';
-  color: var(--sl-color-text-accent);
+/* Card grid for landing + section landing pages */
+.kata-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0 2.5rem;
+  list-style: none;
+  padding: 0;
+}
+.kata-grid li { list-style: none; margin: 0 !important; }
+.kata-card,
+a.kata-card {
+  display: block;
+  background: var(--k-bg2);
+  border: 1px solid var(--k-border);
+  border-radius: 12px;
+  padding: 1.35rem;
+  text-decoration: none !important;
+  color: var(--k-text);
+  transition: border-color 0.2s, transform 0.2s, background 0.2s;
+  height: 100%;
+}
+.kata-card:hover {
+  border-color: var(--k-cyan);
+  background: rgba(0,240,255,0.03);
+  transform: translateY(-2px);
+  text-decoration: none !important;
+}
+.kata-card h3 {
+  font-family: var(--sl-font-serif);
+  font-size: 1.2rem;
+  margin: 0 0 0.4rem;
+  border: none;
+  padding: 0;
+  color: var(--k-text);
+}
+.kata-card p { font-size: 0.9rem; color: var(--k-dim); margin: 0; line-height: 1.55; }
+.kata-card__eyebrow {
+  display: block;
+  font-family: var(--sl-font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--k-magenta);
+  margin-bottom: 0.4rem;
+}
+.kata-card a::after { content: none; }
+
+/* Utility buttons */
+.kata-btn, a.kata-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--sl-font-mono);
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  padding: 0.7rem 1.25rem;
+  border-radius: 8px;
+  background: var(--k-cyan);
+  color: var(--k-bg) !important;
+  text-decoration: none !important;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.kata-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(0,240,255,0.3); }
+.kata-btn--ghost {
+  background: transparent !important;
+  color: var(--k-cyan) !important;
+  border: 1px solid var(--k-cyan);
+}
+.kata-btn--ghost:hover { background: rgba(0,240,255,0.08) !important; }
+
+.kata-cta-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin: 1rem 0 2rem;
 }
 
-/* The default Starlight hero splash is fine, but kill the emoji-ish vibe. */
-.hero {
-  background: linear-gradient(160deg, var(--sl-color-bg) 0%, #12101a 100%);
-  border-bottom: 1px solid var(--sl-color-hairline);
+/* ── Mobile ──────────────────────────────────────────── */
+@media (max-width: 720px) {
+  .sl-markdown-content h1 { font-size: 1.9rem; }
+  .sl-markdown-content h2 { font-size: 1.45rem; }
+  .kata-hero { padding: 2.75rem 1rem 2rem; margin: -1.5rem -1rem 1.75rem; }
+  .kata-hero__title { font-size: 2rem; }
 }
