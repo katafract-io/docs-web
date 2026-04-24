@@ -1,8 +1,124 @@
 ---
-title: Trust — bug-bounty
-description: bug-bounty (stub — Opus-drafted content pending).
+title: Trust — bug bounty
+description: How to report a vulnerability to Katafract, what's in scope, and what we pay.
 ---
 
-:::note[Stub]
-Content coming. Tracked in docs-internal/seo/contract/questionnaire for tone + details.
+If you find a vulnerability in Katafract, we want to know. This page is the policy: what's in scope, what isn't, what we pay, and how we handle reports. It is short on purpose. It is not run through a bounty platform; you report directly and you get paid directly.
+
+## Scope
+
+### In scope
+
+- Public-facing services:
+  - `api.katafract.com` — Artemis control plane
+  - `auth.katafract.com` — Sigil / Zitadel identity
+  - `secrets.katafract.io` — Infisical (interface only; findings on the upstream Infisical project should go to them too)
+  - `mesh.katafract.io` — Headscale control
+  - `admin.katafract.io` — admin dashboard
+  - `connect.katafract.com` — client portal
+  - `lists.katafract.io` — newsletter
+  - `docs.katafract.io` — this site
+  - `katafract.com`, `s3.objstore.io`, `*.s3.objstore.io`
+- Public-facing apps: WraithVPN, Haven, Vaultyx, SafeOpen, DocArmor, ExifArmor, ParkArmor, the Mosaic family
+- Public code repositories under `github.com/katafract-io/*` and `github.com/mosaic-family/*`
+
+### In-scope issue classes
+
+- Authentication bypass and session fixation
+- Privilege escalation (user-to-admin, free-to-paid, cross-tenant)
+- Data exposure — user data accessible without the expected authorization
+- Remote code execution on any Katafract-controlled service
+- Injection (SQL, command, template) with demonstrable impact
+- Broken cryptography — key reuse, predictable nonces, padding oracles, algorithm downgrade
+- Subscription forgery — granting yourself or anyone else a plan without paying
+- Token forgery, replay, or misbinding — making a Sigil token that the server accepts for a user that isn't you, or for a plan tier higher than what was issued
+- Exfiltration paths the architecture was supposed to prevent — e.g., a codepath where the Vaultyx server can read a filename in plaintext
+
+### Out of scope
+
+- Anything on the `100.64.0.0/10` mesh. Mesh services are not internet-accessible and are not in scope even if you find a way onto the mesh (report the way-onto-the-mesh, not what you found once there).
+- Self-hosted infrastructure on the founder's home node (`tartarus`). It holds no other user's data.
+- Third-party services we link to (Stripe, Apple, Zitadel upstream, AdGuard Home upstream). Report those to the upstream project or vendor; we'll help triage.
+- Clickjacking on logged-out pages
+- Self-XSS
+- Missing SPF / DMARC / DKIM on non-mail domains
+- Missing rate limits without a demonstrable abuse path
+- Missing HTTP security headers without a demonstrable attack
+- Social engineering, phishing of Katafract staff, physical attacks
+- Denial-of-service attacks, load-based or otherwise
+- Automated scanner output without a working proof-of-concept
+
+## Reward tiers
+
+Modest but not zero. Paid in USD via the method that works for you (bank wire, Stripe payout, crypto, cheque).
+
+| Severity | Example | Reward |
+|---|---|---|
+| Critical | Auth bypass on `api.katafract.com`, RCE on a WraithGate node, mass user data exposure, subscription forgery at scale | $500 – $2,000 |
+| High | Privilege escalation affecting multiple users, significant data exposure of one user's data, breaking a security control the architecture relies on | $250 – $500 |
+| Medium | Bypass of a specific control, limited data exposure, exploit requiring unusual user interaction | $100 – $250 |
+| Low | Minor information disclosure with limited impact | Katafract swag + public credit (with your consent) |
+
+The range within each tier reflects impact, exploitability, and quality of the report. A clean proof-of-concept with a suggested fix lands at the top of the range.
+
+## How to report
+
+Email `security@katafract.com`. Encrypt if you want to; the key fingerprint is:
+
+```
+PGP fingerprint: [placeholder — to be replaced before public launch]
+Key URL: https://katafract.com/.well-known/security-pgp-key.asc
+```
+
+Include:
+
+- A description of the issue
+- Exact reproduction steps (requests, payloads, clicks)
+- Affected service / URL / app version
+- Impact assessment in your own words
+- Your preferred payout method, only after we confirm a reward tier
+
+:::note
+If the finding is time-sensitive (actively exploitable in production) flag it in the subject line: `SECURITY URGENT:`. Urgent reports skip the queue.
 :::
+
+## Response timeline
+
+| Step | Target |
+|---|---|
+| Acknowledge receipt | 3 business days |
+| Triage + initial severity call | 7 business days |
+| Fix shipped | Varies by severity: Critical within 7 days, High within 30 days, Medium within 90 days |
+| Reward paid | Within 14 days of the fix shipping |
+| Public disclosure (if applicable) | Coordinated with you. Default: 30 days after fix. |
+
+## Safe harbor
+
+Good-faith security research performed within this policy is authorized. We will not pursue legal action or report you to law enforcement for:
+
+- Accessing data that belongs to Katafract accounts you control (yours, or test accounts you created)
+- Testing the in-scope services listed above
+- Accidentally accessing data that isn't yours, as long as you stop, report it, and do not retain it
+
+You must not:
+
+- Exfiltrate user data beyond what's needed to prove the finding
+- Run denial-of-service attacks
+- Use social engineering against Katafract staff or users
+- Access data belonging to other users beyond what's needed to prove the finding (e.g., one affected user is proof; dumping the whole table is not)
+
+Act like a researcher and we'll treat you like one.
+
+## No middleman
+
+We do not use HackerOne, Bugcrowd, Intigriti, or any other platform that takes a percentage of your reward. You report directly, we pay directly, you keep all of it.
+
+## Public recognition
+
+With your consent, we publish a hall-of-fame entry when the fix ships. Opt out if you'd rather stay anonymous; the payout is the same either way.
+
+## Related
+
+- [Incidents](/trust/incidents/) — how we disclose vulnerabilities once they're fixed
+- [Threat model](/architecture/threat-model/) — what the platform is designed to defeat
+- [Warrant canary](https://katafract.com/canary)

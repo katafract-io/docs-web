@@ -1,8 +1,93 @@
 ---
 title: Trust — logs
-description: logs (stub — Opus-drafted content pending).
+description: What Katafract logs at each layer, and what it deliberately doesn't. Per-service breakdown with retention windows.
 ---
 
-:::note[Stub]
-Content coming. Tracked in docs-internal/seo/contract/questionnaire for tone + details.
+The short version: there is no per-user DNS log, no per-user VPN traffic log, no per-user file access log, and no analytics SDK in any Katafract app. The long version is below, service by service, so you can verify each claim against the running config.
+
+## What gets captured, layer by layer
+
+### artemis-api (control plane)
+
+| Field | Captured | Retention | Linked to identity |
+|---|---|---|---|
+| HTTP method + path | yes | 30 days in Loki | token hash, never raw identity |
+| Response status + duration | yes | 30 days | token hash |
+| Error stack trace | yes on 5xx | 30 days | token hash |
+| Request body | no | — | — |
+| Response body | no | — | — |
+
+Loki runs on fury. Lines are keyed by service + level + route, never by email or by device ID. When a line needs to reference a user it stores a truncated SHA-256 of the Sigil token, which cannot be reversed to a plan or email without joining against Postgres.
+
+### Zitadel (Sigil identity backend)
+
+| Event | Captured | Retention |
+|---|---|---|
+| Sign-in attempt | yes | 90 days |
+| Token issue + refresh | yes | 90 days |
+| Plan change | yes | 90 days (indefinitely in Postgres row history) |
+| Password | n/a — we don't take passwords |
+| Email | yes (comes from Apple / Stripe / Google at signup) | duration of account |
+
+Identity binds to Apple, Google, or a Stripe-provided email. We never see a password. When Apple relays a private-relay address we store only that address.
+
+### Haven (AdGuard Home on every WraithGate node)
+
+DNS query logging is **disabled** at the config level. The file `/opt/adguardhome/AdGuardHome.yaml` on each node contains:
+
+```yaml
+querylog:
+  enabled: false
+  file_enabled: false
+```
+
+What is kept: aggregate counters — total queries in the last hour, total blocks in the last hour, by-category counters (ads, trackers, malware). These live in memory on the node and are flushed every 7 days. They are never per-user and never per-query.
+
+DNS resolution terminates on the node. Upstream DoH goes to Quad9 and Cloudflare in parallel mode. Your DNS query leaves the node as one of many to those resolvers; your IP is not in that upstream request.
+
+### WraithGate VPN nodes
+
+WireGuard does not log connections by default, and we haven't turned logging on. The kernel maintains `wg show` transient state (public key, endpoint, last handshake, bytes tx/rx) which lives in memory and is never written to disk.
+
+The systemd journal contains start/stop lines for `wg-quick@wg1.service` and nothing per-connection. Journals rotate weekly. Nothing in the journal ties a timestamp to a specific peer.
+
+Node heartbeats to the control plane carry aggregate counters — peer count on the interface, total bytes tx/rx on the interface — never per-peer.
+
+### Garage S3 (Vaultyx storage backend)
+
+Object access logs are not enabled. Garage's per-request logs are left at `info` level (connection lifecycle only) and rotated with the system journal.
+
+Operational telemetry kept: bucket size, object count, disk used per node, replication health. None of it is per-object or per-user at the server level.
+
+Vaultyx encrypts filenames, folder structure, and file content on the client before upload. The server sees a chunk hash and a ciphertext blob. There is no "view the filename" codepath, because the server does not hold the key.
+
+### Stripe (subscriptions)
+
+Stripe holds billing details (name, card, billing country, email). Katafract sees only what Stripe sends in the subscription webhook: customer ID, plan ID, period start/end, status. That record lives in the `subscriptions` table on argus. We do not store card numbers, CVV, or billing addresses — they remain on Stripe.
+
+If Stripe sends a refund or dispute event, we record the event ID and type, not the card details.
+
+## What we deliberately don't log
+
+- DNS queries, per user. Haven's query log is disabled, and upstream DoH doesn't carry user-identifying state.
+- VPN traffic content. WireGuard is L3; we don't inspect packets and we don't record destinations.
+- File names or file access times on the Vaultyx server. The server cannot read the names.
+- In-app behavior. Katafract apps do not ship Google Analytics, Amplitude, Segment, Firebase, or any third-party SDK that phones home on user action. The only app-to-backend call is the one the user's action triggers (fetch a VPN config, sync a file, scan a URL).
+- Crash reports to third parties. Apple's crash reports are opt-in at the OS level and go to Apple, not to us. We read them when Apple surfaces them in App Store Connect.
+
+## How to verify these claims
+
+- **Haven config** — when `katafract-io/katafract-node` is made public, the AGH config template lives there. Until it is public, a node operator can run `grep querylog /opt/adguardhome/AdGuardHome.yaml` on any WraithGate node and the result will be `enabled: false`.
+- **Warrant canary** — [katafract.com/canary](https://katafract.com/canary). If a logging policy has been secretly changed under legal compulsion, the canary will stop updating.
+- **Bug bounty** — [`/trust/bug-bounty/`](/trust/bug-bounty/). We pay for proofs that contradict the statements on this page.
+- **Source review** — `artemis-api` logging configuration is in the open-source portion of the platform repo (Loki labels, log schema). A contradiction between this page and that code is a bug; report it.
+
+:::note
+The team has access to the Loki query interface, the Zitadel admin UI, and the Postgres replica. Access is by SSH key on a mesh-only interface. No automation exfiltrates these logs off the fleet.
 :::
+
+## Related
+
+- [Retention](/trust/retention/) — lifecycle of each data category after capture
+- [Threat model](/architecture/threat-model/) — what this logging posture is designed to survive
+- [Warrant canary](https://katafract.com/canary)
