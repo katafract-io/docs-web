@@ -1,0 +1,28 @@
+---
+title: Trust
+description: What Katafract does, doesn't, and can't — documented. Infrastructure, logs, retention, incidents, bug bounty.
+---
+
+Trust isn't a line in copy. It's a set of commitments you can inspect.
+
+The pages in this section describe what Katafract does with data, what it can't do because the architecture prevents it, and how we handle what does happen — including the things that go wrong.
+
+## What lives here
+
+- **[Infrastructure](/trust/infrastructure/)** — the node map, who operates each box, what jurisdiction it sits in.
+- **[Logs policy](/trust/logs/)** — what we log at each layer, and what we deliberately don't.
+- **[Retention](/trust/retention/)** — how long data lives before it's deleted.
+- **[Incidents](/trust/incidents/)** — public post-mortems for outages and security events.
+- **[Bug bounty](/trust/bug-bounty/)** — how to report a vulnerability and what we pay.
+
+## Where the canary lives
+
+Our **warrant canary** lives at [`katafract.com/canary`](https://katafract.com/canary). It's intentionally on the consumer-facing domain where the widest audience can find it and where transparency scrapers can archive it. We update it monthly. If it stops updating, read that as a signal.
+
+## Architectural trust story
+
+The summary of *why* these pages exist the way they do:
+
+> **Infrastructure built so there's nothing to betray.** Tokens handle identity instead of accounts. Encryption keys live on your device so the server holds ciphertext. Pricing is allotments of storage and bandwidth, not behavior or attention. There's no advertising business to sell you into, because the data to run one doesn't exist on our side of the wire.
+
+More detail: [katafract.com/about/](https://katafract.com/about/).

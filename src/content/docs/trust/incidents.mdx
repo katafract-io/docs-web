@@ -1,0 +1,55 @@
+---
+title: Trust — incidents
+description: Public incident history and the post-mortem policy that governs it.
+---
+
+We publish post-mortems for incidents that affected users or the posture we advertise. No spin. No "we take this seriously" language. The format is: what happened, what users saw, what we fixed, what we changed so it doesn't repeat.
+
+## Policy
+
+| Event class | Post-mortem window |
+|---|---|
+| Security incident — unauthorized access, data exposure, credential compromise, confirmed vulnerability exploited against Katafract infrastructure | Within 7 days of confirmation |
+| Outage — any user-facing service unavailable for more than 15 minutes (WraithVPN routing, Haven DNS, Sigil auth, Vaultyx sync, admin.katafract.io) | Within 14 days |
+| Degradation — slow but working | Mentioned in the next monthly transparency note, not a full post-mortem |
+
+A post-mortem is a page on this site, under `/trust/incidents/<date>-<slug>/`, published at the same URL for the life of the platform. We do not delete or silently rewrite post-mortems. Corrections are appended with a timestamp.
+
+## What a post-mortem contains
+
+- **Start (UTC) / end (UTC) / duration.** Times are in UTC without exception.
+- **Summary.** One paragraph a non-technical user can read.
+- **Impact.** Which users were affected, in what way, for how long. With numbers.
+- **Root cause.** The technical cause.
+- **Detection.** How we found out and how long that took.
+- **Resolution.** What we did to restore service.
+- **Follow-up actions.** What changes ship so this doesn't recur, with owners and target dates. Marked done when done.
+
+## Incident history
+
+| Date (UTC) | Service | Duration | Type | Post-mortem |
+|---|---|---|---|---|
+| — | — | — | — | No reportable incidents to date |
+
+This table is maintained by hand. If an incident has occurred and you don't see it here, that's either because it didn't cross the reporting threshold or because we haven't hit the deadline yet. In the latter case, the URL for the post-mortem is reserved and will fill in within the window.
+
+## Notifications
+
+We are setting up two channels for incident notifications:
+
+- **Email list** — opt-in at signup or later from the client portal. Delivers the post-mortem link when one is published.
+- **RSS feed** — `https://docs.katafract.io/trust/incidents/feed.xml`. Planned. Not live yet.
+
+Until those are live, the canonical source is this page. It is linked from [katafract.com/canary](https://katafract.com/canary) and from the docs navigation.
+
+## If you think you're seeing an incident we haven't disclosed
+
+Email `security@katafract.com`. Include what you observed, when (in UTC if you can), and which service. We'll respond within 3 business days with either a confirmation that we're tracking it, a pointer to an existing post-mortem, or an explanation of why the symptom isn't what it looked like.
+
+For vulnerability disclosure specifically — *you found a bug that could be exploited* rather than *something is broken right now* — see [bug bounty](/trust/bug-bounty/).
+
+## Related
+
+- [Warrant canary](https://katafract.com/canary)
+- [Bug bounty](/trust/bug-bounty/)
+- [Threat model](/architecture/threat-model/)

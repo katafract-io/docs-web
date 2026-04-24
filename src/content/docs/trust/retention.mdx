@@ -1,0 +1,57 @@
+---
+title: Trust — retention
+description: How long each category of data lives before it is deleted. One row per category, with the reason and the delete trigger.
+---
+
+Every row below is the same shape: *we keep X for Y because Z, and then it's deleted*. If a row is missing that you care about, email support@katafract.com and we'll add it.
+
+## By category
+
+| Category | Retention | Reason | Delete trigger |
+|---|---|---|---|
+| **Sigil auth tokens** | Valid until revoked or expired (varies by plan; typically 30 days for refresh) | Session continuity without re-auth on every request | Token expiry, manual revoke from admin, or plan cancellation |
+| **Subscription state** | Duration of subscription + 30 days | 30-day window covers Apple/Stripe refunds and reactivation without losing Vault keys | Scheduled purge job, 30 days after `status=canceled` |
+| **Support correspondence** | 180 days | Long enough to resolve follow-ups; short enough to not become a subpoena target | Automated monthly sweep |
+| **Postgres backup snapshots** | 14 days rolling | Point-in-time recovery for operational incidents | Litestream / pg_dump retention policy on argus + fury |
+| **Application logs (Loki)** | 30 days rolling | Enough to diagnose incidents and ship fixes; short enough to bound disclosure | Loki retention policy |
+| **Operational metrics (Prometheus)** | 90 days | Capacity planning and trend analysis | Prometheus TSDB retention |
+| **Haven aggregate counters** | 7 days | Operator health checks only | In-memory rotation on each node |
+| **Vaultyx user files** | Until deleted by user, or subscription end + 30 days | Grace window for reactivation; chunks are encrypted so this is holding ciphertext | User delete, or scheduled purge 30 days after cancel |
+| **Decrypted user data** | Never held | Server does not possess the key. There is no plaintext to retain. | n/a |
+
+## Notes on a few of these
+
+### Tokens
+
+The Sigil token envelope carries the tier and device binding. When you cancel a plan, the token continues to validate against the expiration already baked into its claims; new tokens stop being issued. We do not maintain a server-side session store that we can retroactively mine. Revocation adds the token hash to a short revocation list, which is what we read on validate.
+
+### Subscriptions
+
+We keep the subscription row (plan, status, period end) while you have an active plan, and for 30 days after cancellation. During that 30-day window, Vaultyx files are retained so you can reactivate without losing data. After the grace window, the row is marked for hard-delete and the Garage chunks associated with the account are queued for deletion.
+
+### Backups
+
+Postgres backups are encrypted at rest on the storage targets. They contain the same data as the primary — subscription metadata, token hashes, peer records — just frozen in time. When primary data is deleted, the deletion propagates through backup windows as snapshots age out of the 14-day rolling window.
+
+### Logs
+
+Loki retention is enforced at the storage layer, not by a cron. Lines older than 30 days are not readable, including by the team. A hypothetical subpoena for "all logs related to user X for 2025" would return empty because Loki does not hold that window and because we don't key logs by user identity in the first place.
+
+### Vaultyx
+
+Deletion semantics are documented in the [Vaultyx module page](/modules/vaultyx/). The short version: when you delete a file, the client tombstones the metadata and the server's reference-counting job purges unreferenced chunks on the next sweep.
+
+## Shortening a retention window
+
+If you want a retention window shortened on your account specifically — for example, you want support correspondence purged on close rather than after 180 days — email support@katafract.com. We honor reasonable requests. We log the request itself so we have a record that you asked, then we do the purge.
+
+## What cannot be shortened by request
+
+- **Regulatory records.** Stripe retains transaction records per US financial-services rules. We can delete our copy; Stripe keeps theirs.
+- **Backups within the 14-day window.** Individual rows inside a frozen snapshot cannot be selectively edited. We delete from primary; the snapshot ages out naturally.
+
+## Related
+
+- [Logs policy](/trust/logs/) — the capture side of the lifecycle
+- [Incidents](/trust/incidents/) — what happens if retention policy is violated
+- [Vaultyx](/modules/vaultyx/) — file-level deletion semantics
