@@ -15,9 +15,9 @@ export default defineConfig({
         alt: 'Katafract',
       },
       favicon: '/favicon.svg',
-      social: {
-        github: 'https://github.com/katafract-io',
-      },
+      social: [
+        { icon: 'github', label: 'GitHub', href: 'https://github.com/katafract-io' },
+      ],
       customCss: ['./src/styles/katastyle.css'],
       head: [
         {
