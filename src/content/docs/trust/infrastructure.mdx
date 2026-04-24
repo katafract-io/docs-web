@@ -38,7 +38,7 @@ Vaultyx ciphertext chunks land here. Replication factor is 2 across zones.
 
 | Node | Region | Provider | Role | Capacity |
 |---|---|---|---|---|
-| fury | Vienna, AT | Contabo | Garage node, zone `us-central` | 1.5 TB |
+| fury | St. Louis, MO, US | Contabo | Garage node, zone `us-central` | 1.5 TB |
 | atlas | Vint Hill, VA, US | OVH Kimsufi | Garage node, zone `us-vin` | 14.8 TB |
 | hades | Beauharnois, QC, CA | OVH Kimsufi | Garage node, zone `ca-bhs` | 14.8 TB |
 
@@ -50,13 +50,13 @@ One box runs a warm standby for the control plane and the monitoring stack. It d
 
 | Node | Region | Provider | Role | IPv4 |
 |---|---|---|---|---|
-| fury | Vienna, AT | Contabo | artemis-api standby, Prometheus, Grafana | 85.239.240.208 |
+| fury | St. Louis, MO, US | Contabo | artemis-api standby, Prometheus, Grafana | 85.239.240.208 |
 
 ## Providers we use
 
 - **Hetzner** — EU + US nodes. Cloud + dedicated.
 - **Vultr** — APAC + US-East nodes. Cloud.
-- **Contabo** — European VPS used for monitoring + Shards `us-central`.
+- **Contabo** — US Central VPS (Missouri) used for monitoring + Shards `us-central`.
 - **OVH Kimsufi** — North American dedicated storage boxes (atlas, hades).
 - **Self-hosted at Tek's home** — a mini PC (`tartarus`) runs a *standalone* Garage cluster used only by the founder as a dogfood customer. It is not part of the shared Shards cluster and holds no other user's data.
 
