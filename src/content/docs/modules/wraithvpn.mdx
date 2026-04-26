@@ -28,9 +28,17 @@ All nodes route IPv4 traffic over WireGuard UDP 51820. Haven DNS is bound to the
 ## Protocols
 
 - **WireGuard** (default). Standard. `wg0` on every node, UDP 51820.
-- **Shadowsocks + v2ray-plugin** (fallback). TLS-tunneled Shadowsocks on ports 8443-8452. Indistinguishable from HTTPS to a DPI observer.
+- **Shadowsocks + v2ray-plugin** (fallback). TLS-tunneled Shadowsocks on TCP 8443. Indistinguishable from HTTPS to a DPI observer.
 
 AmneziaWG (`awg`) was in the fleet through April 2026. It was retired in favor of the Shadowsocks fallback because SS-TLS is more universally effective against modern DPI and has fewer client-side compatibility constraints.
+
+### SS-fallback details
+
+Each node runs a single `shadowsocks-rust` instance on TCP 8443 using the `2022-blake3-aes-256-gcm` cipher. Every provisioned peer gets its own PSK — multi-user Encrypted Identity Header (EIH) lets the server identify each user's session within the shared port without any per-user port allocation.
+
+The stack from the outside looks like an ordinary HTTPS server. v2ray-plugin terminates TLS using a Let's Encrypt certificate for `<node-id>.vpn.katafract.com`. Inside the TLS layer, Shadowsocks-2022 decapsulates the traffic and hands WireGuard UDP packets to `wg0` locally.
+
+Per-user credentials are embedded in the provision response — clients configure the fallback transport automatically, with no additional user action required. The client app falls back to SS when direct WireGuard UDP is blocked by upstream DPI.
 
 ## Provisioning a peer
 
@@ -83,7 +91,15 @@ Response (abbreviated):
     "persistent_keepalive": 25
   },
   "node_id": "vpn-iad-01",
-  "expires_at": 1743973231
+  "expires_at": 1743973231,
+  "shadowsocks_fallback": {
+    "server": "vpn-iad-01.vpn.katafract.com",
+    "port": 8443,
+    "method": "2022-blake3-aes-256-gcm",
+    "password": "<SERVER_PSK>:<USER_PSK>",
+    "plugin": "v2ray-plugin",
+    "plugin_opts": "tls;host=vpn-iad-01.vpn.katafract.com"
+  }
 }
 ```
 
