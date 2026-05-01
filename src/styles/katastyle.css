@@ -437,11 +437,19 @@ a.kata-card {
 }
 .kata-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(0,240,255,0.3); }
 .kata-btn--ghost {
-  background: transparent !important;
+  /* Not actually transparent — the hero's cyan radial bleeds through and
+     drops cyan-on-cyan-tint contrast below readable. Dark frosted backing
+     keeps the ghost feel without making "transparency" literally invisible. */
+  background: rgba(5, 5, 16, 0.55) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   color: var(--k-cyan) !important;
-  border: 1px solid var(--k-cyan);
+  border: 1.5px solid var(--k-cyan);
 }
-.kata-btn--ghost:hover { background: rgba(0,240,255,0.08) !important; }
+.kata-btn--ghost:hover {
+  background: rgba(0, 240, 255, 0.12) !important;
+  box-shadow: 0 0 0 1px var(--k-cyan), 0 6px 24px rgba(0,240,255,0.2);
+}
 
 .kata-cta-row {
   display: flex;
