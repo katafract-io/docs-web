@@ -439,17 +439,20 @@ a.kata-card {
   transition: transform 0.15s, box-shadow 0.15s;
 }
 .kata-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(0,240,255,0.3); }
-.kata-btn--ghost {
-  /* Not actually transparent — the hero's cyan radial bleeds through and
-     drops cyan-on-cyan-tint contrast below readable. Dark frosted backing
-     keeps the ghost feel without making "transparency" literally invisible. */
+/* Selector includes `a.` to match `a.kata-btn` specificity (0,1,1) and the
+   `.kata-btn.kata-btn--ghost` form to win against any `<button>` variant —
+   without this, the primary rule's !important color wins the cascade and
+   the ghost text renders as page-bg, making the button invisible. */
+a.kata-btn--ghost,
+.kata-btn.kata-btn--ghost {
   background: rgba(5, 5, 16, 0.55) !important;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   color: var(--k-cyan) !important;
   border: 1.5px solid var(--k-cyan);
 }
-.kata-btn--ghost:hover {
+a.kata-btn--ghost:hover,
+.kata-btn.kata-btn--ghost:hover {
   background: rgba(0, 240, 255, 0.12) !important;
   box-shadow: 0 0 0 1px var(--k-cyan), 0 6px 24px rgba(0,240,255,0.2);
 }
