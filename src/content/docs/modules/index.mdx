@@ -1,0 +1,28 @@
+---
+title: Modules
+description: Protocol and architecture reference for every Katafract platform module — Sigil identity, Haven DNS, WraithVPN, Vaultyx storage, Shards object store.
+---
+
+Developer reference for the platform underneath the apps. Each module page covers the architecture, the protocols, the wire formats, and the verification recipes — what's actually doing the work.
+
+If you want how-to docs aimed at the user holding the app, see [Apps](/apps/) instead.
+
+## Identity & access
+
+- **[Sigil — identity](/modules/sigil/)** — token-based identity primitive. No email, no password, no third-party IdP. How tokens are issued, paired to devices, and revoked.
+
+## Network
+
+- **[Haven — DNS](/modules/haven/)** — the DNS layer. AdGuard Home + OISD blocklists at every WraithGate node, bound to the WireGuard interface so it's reachable only from the tunnel.
+- **[WraithVPN](/modules/wraithvpn/)** — the VPN layer. Standard WireGuard via ten exit nodes, plus a Shadowsocks + v2ray-plugin TLS fallback for hostile networks.
+
+## Storage
+
+- **[Vaultyx — storage](/modules/vaultyx/)** — client-side encryption, FastCDC chunking, manifest-keyed uploads, cross-device replication. Where the per-device key derivation lives.
+- **[Shards — S3 cluster](/modules/shards/)** — Garage S3 cluster behind `*.s3.objstore.io`. Replication factor, zones, and how the buckets are scoped.
+
+## Where to go next
+
+- For deployment-side architecture (how the planes connect, what each box runs), see [Architecture overview](/architecture/overview/).
+- For what we don't log and how that's enforced in the running system, see [Trust — logs](/trust/logs/).
+- For the apps that consume these modules, see [Apps](/apps/).

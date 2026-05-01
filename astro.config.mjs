@@ -21,12 +21,16 @@ export default defineConfig({
       customCss: ['./src/styles/katastyle.css'],
       head: [
         { tag: 'link', attrs: { rel: 'stylesheet', href: '/fonts.css' } },
-        // Privacy-friendly analytics by Plausible (self-hosted at pulse.katafract.io).
+        // Privacy-friendly analytics — Plausible self-hosted at pulse.katafract.io,
+        // proxied through Cloudflare Pages Functions at /stats/* so the path is
+        // first-party. See marketing/analytics.md in the workshop.
         {
           tag: 'script',
           attrs: {
-            async: true,
-            src: 'https://pulse.katafract.io/js/pa-2kHGqWksEcC0m22x_0-iQ.js',
+            defer: true,
+            'data-domain': 'docs.katafract.io',
+            'data-api': '/stats/api/event',
+            src: '/stats/js/script.js',
           },
         },
         {
@@ -73,6 +77,7 @@ export default defineConfig({
         {
           label: 'Modules',
           items: [
+            { label: 'Overview', slug: 'modules' },
             { label: 'Sigil — identity', slug: 'modules/sigil' },
             { label: 'Haven — DNS', slug: 'modules/haven' },
             { label: 'WraithVPN', slug: 'modules/wraithvpn' },

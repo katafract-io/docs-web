@@ -3,6 +3,10 @@ title: Shards — S3 cluster
 description: The Garage S3 cluster that backs Vaultyx and every other internal object-store consumer. Three nodes across three physical locations, replication factor 2.
 ---
 
+:::tip[Customer-facing storage]
+Shards is the underlying object store. The customer-facing storage product is [Vaultyx](/apps/vaultyx/getting-started/) — see also the [Vaultyx module](/modules/vaultyx/) for how chunks land in this cluster.
+:::
+
 Shards is the name of Katafract's object-storage cluster. It speaks the S3 API, runs Garage under the hood, and replicates every object across physically distinct zones.
 
 ## Topology
