@@ -21,6 +21,34 @@ export default defineConfig({
       customCss: ['./src/styles/katastyle.css'],
       head: [
         { tag: 'link', attrs: { rel: 'stylesheet', href: '/fonts.css' } },
+        // Site-wide JSON-LD: Organization (legal entity) + WebSite. No founder
+        // name — Tek pseudonymously. See workshop/marketing/seo-jsonld-templates.md.
+        {
+          tag: 'script',
+          attrs: { type: 'application/ld+json' },
+          content: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Organization',
+            name: 'Katafract LLC',
+            url: 'https://katafract.com',
+            logo: 'https://katafract.com/images/katafract-mark.svg',
+            sameAs: [
+              'https://github.com/katafract-io',
+              'https://docs.katafract.io',
+            ],
+          }),
+        },
+        {
+          tag: 'script',
+          attrs: { type: 'application/ld+json' },
+          content: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'WebSite',
+            name: 'Katafract Enclave docs',
+            url: 'https://docs.katafract.io',
+            publisher: { '@type': 'Organization', name: 'Katafract LLC' },
+          }),
+        },
         // Privacy-friendly analytics — Plausible self-hosted at pulse.katafract.io,
         // proxied through Cloudflare Pages Functions at /stats/* so the path is
         // first-party. See marketing/analytics.md in the workshop.
