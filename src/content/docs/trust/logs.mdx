@@ -17,7 +17,9 @@ The short version: there is no per-user DNS log, no per-user VPN traffic log, no
 | Request body | no | — | — |
 | Response body | no | — | — |
 
-Loki runs on fury. Lines are keyed by service + level + route, never by email or by device ID. When a line needs to reference a user it stores a truncated SHA-256 of the Sigil token, which cannot be reversed to a plan or email without joining against Postgres.
+Logs ship from services through Promtail on fury into a Loki instance — also on fury — for short-window debugging. **The hygiene is enforced at Promtail's relabel config, not at the query layer.** Promtail only attaches `job`, `instance`, `unit`, `host`, and `level` as labels. Never email, device ID, IP, or token. When an application log line itself needs to reference a user, the application code writes a truncated SHA-256 of the Sigil token, which cannot be reversed to a plan or email without joining against Postgres on argus.
+
+This matters because Loki is a destination, not the policy. Even if a query interface were misused, the labels Promtail emits are the only labels Loki ever sees — so user-correlated queries on the log stream aren't possible because the data structure to support them was never written.
 
 ### Zitadel (Sigil identity backend)
 
@@ -77,13 +79,14 @@ If Stripe sends a refund or dispute event, we record the event ID and type, not 
 
 ## How to verify these claims
 
+- **Promtail labels config** — `/opt/monitoring/promtail-fury/promtail.yml` on fury. The `journal.labels` and `relabel_configs` blocks are the entire allowlist of labels Loki ever sees: `job`, `instance`, `unit`, `host`, `level`. When `katafract-io/katafract-monitoring` is made public, that file will be the canonical source.
 - **Haven config** — when `katafract-io/katafract-node` is made public, the AGH config template lives there. Until it is public, a node operator can run `grep querylog /opt/adguardhome/AdGuardHome.yaml` on any WraithGate node and the result will be `enabled: false`.
 - **Warrant canary** — [katafract.com/canary](https://katafract.com/canary). If a logging policy has been secretly changed under legal compulsion, the canary will stop updating.
 - **Bug bounty** — [`/trust/bug-bounty/`](/trust/bug-bounty/). We pay for proofs that contradict the statements on this page.
-- **Source review** — `artemis-api` logging configuration is in the open-source portion of the platform repo (Loki labels, log schema). A contradiction between this page and that code is a bug; report it.
+- **Source review** — when the platform repo is opened, `artemis-api` log emission and the Promtail relabel config will be on GitHub. Until then, this page describes both, and the warrant canary backs the description.
 
 :::note
-The team has access to the Loki query interface, the Zitadel admin UI, and the Postgres replica. Access is by SSH key on a mesh-only interface. No automation exfiltrates these logs off the fleet.
+The team queries logs through Grafana on the mesh-only `grafana.katafract.io` (Zitadel SSO). Direct Loki access requires SSH to fury via the WireGuard mesh. No log-export automation runs against the fleet.
 :::
 
 ## Related
