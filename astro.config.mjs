@@ -34,9 +34,6 @@ export default defineConfig({
           content: "window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()",
         },
       ],
-      editLink: {
-        baseUrl: 'https://github.com/katafract-io/docs-web/edit/main/',
-      },
       lastUpdated: true,
       sidebar: [
         {

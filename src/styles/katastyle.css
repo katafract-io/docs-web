@@ -60,8 +60,11 @@
   --sl-content-width: 52rem;
 }
 
-/* Force dark-only. */
+/* Force dark-only. The brand is dark; the light/dark theme toggle is hidden
+   below since both data-theme states map to the same tokens — leaving the
+   toggle visible is a control that lies to the user. */
 :root { color-scheme: dark; }
+starlight-theme-select { display: none !important; }
 
 html, body {
   background: var(--k-bg);
