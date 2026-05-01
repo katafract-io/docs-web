@@ -1,25 +1,59 @@
 ---
 title: Trust
 description: What Katafract does, doesn't, and can't — documented. Infrastructure, logs, retention, incidents, bug bounty.
+template: splash
 ---
 
-Trust isn't a line in copy. It's a set of commitments you can inspect.
+<div class="kata-hero">
+  <div class="kata-hero__inner">
+    <div class="kata-hero__eyebrow">Trust & Transparency</div>
+    <h1 class="kata-hero__title">Commitments you can <em>inspect</em>,<br />not just read.</h1>
+    <p class="kata-hero__sub">
+      What Katafract does with data, what it can't do because the architecture prevents it, and how we handle what does happen — including the things that go wrong.
+    </p>
+    <div class="kata-hero__pills">
+      <span class="kata-pill">No-log architecture</span>
+      <span class="kata-pill">Public post-mortems</span>
+      <span class="kata-pill kata-pill--magenta">Warrant canary</span>
+      <span class="kata-pill kata-pill--magenta">Bug bounty</span>
+    </div>
+  </div>
+</div>
 
-The pages in this section describe what Katafract does with data, what it can't do because the architecture prevents it, and how we handle what does happen — including the things that go wrong.
+<ul class="kata-grid">
+  <li><a class="kata-card" href="/trust/infrastructure/">
+    <span class="kata-card__eyebrow">Infrastructure</span>
+    <h3>Where the boxes live</h3>
+    <p>The node map, who operates each box, what jurisdiction it sits in.</p>
+  </a></li>
+  <li><a class="kata-card" href="/trust/logs/">
+    <span class="kata-card__eyebrow">Logs policy</span>
+    <h3>What we log — and don't</h3>
+    <p>Layer-by-layer breakdown. What we keep for operations, what we deliberately throw away.</p>
+  </a></li>
+  <li><a class="kata-card" href="/trust/retention/">
+    <span class="kata-card__eyebrow">Retention</span>
+    <h3>How long data lives</h3>
+    <p>Per-data-type retention windows before deletion. The clock starts when the request lands.</p>
+  </a></li>
+  <li><a class="kata-card" href="/trust/incidents/">
+    <span class="kata-card__eyebrow">Incidents</span>
+    <h3>Public post-mortems</h3>
+    <p>Every outage and every security event, written up. What broke, why, what we changed.</p>
+  </a></li>
+  <li><a class="kata-card" href="/trust/bug-bounty/">
+    <span class="kata-card__eyebrow">Bug bounty</span>
+    <h3>How to report a vuln</h3>
+    <p>Scope, channel, payout schedule, and what we ask of researchers.</p>
+  </a></li>
+  <li><a class="kata-card" href="https://katafract.com/canary">
+    <span class="kata-card__eyebrow">Canary</span>
+    <h3>Warrant canary</h3>
+    <p>Updated monthly on the consumer domain so transparency scrapers can archive it. If it stops, read that as a signal.</p>
+  </a></li>
+</ul>
 
-## What lives here
-
-- **[Infrastructure](/trust/infrastructure/)** — the node map, who operates each box, what jurisdiction it sits in.
-- **[Logs policy](/trust/logs/)** — what we log at each layer, and what we deliberately don't.
-- **[Retention](/trust/retention/)** — how long data lives before it's deleted.
-- **[Incidents](/trust/incidents/)** — public post-mortems for outages and security events.
-- **[Bug bounty](/trust/bug-bounty/)** — how to report a vulnerability and what we pay.
-
-## Where the canary lives
-
-Our **warrant canary** lives at [`katafract.com/canary`](https://katafract.com/canary). It's intentionally on the consumer-facing domain where the widest audience can find it and where transparency scrapers can archive it. We update it monthly. If it stops updating, read that as a signal.
-
-## Architectural trust story
+## The architectural trust story
 
 The summary of *why* these pages exist the way they do:
 
