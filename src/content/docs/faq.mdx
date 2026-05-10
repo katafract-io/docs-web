@@ -1,0 +1,80 @@
+---
+title: Frequently asked questions
+description: Common questions about Enclave, WraithVPN, Haven DNS, and Stealth mode.
+---
+
+## WraithVPN
+
+### Stealth mode
+
+Stealth mode uses **Hysteria2** — a QUIC-based transport that looks like HTTPS traffic to network inspection tools. It engages automatically when WraithVPN detects that standard WireGuard UDP packets are being blocked or throttled on your current network (common on some cellular carriers and restrictive Wi-Fi networks).
+
+**What changes in Stealth mode:**
+- Your traffic is encapsulated inside a QUIC stream on port 443 instead of raw UDP
+- The connection is slightly slower due to the extra encapsulation layer
+- The VPN remains fully encrypted end-to-end — Stealth only changes the transport, not the security model
+
+You can also toggle Stealth mode manually from the connect screen. Once engaged on a network, WraithVPN will remember that preference.
+
+---
+
+### Why is my VPN slower on some networks?
+
+A few things affect throughput:
+
+- **Stealth mode** adds a small overhead (~5–10%). If you don't need it on a given network, switch back to standard mode.
+- **Server distance** — choose a node closer to your physical location for lower latency.
+- **Multi-hop** routes traffic through two nodes, adding latency in exchange for stronger privacy.
+
+---
+
+### What is Multi-hop?
+
+Multi-hop routes your traffic through two WraithGate nodes: an **entry node** that knows your IP but not your destination, and an **exit node** that knows the destination but not your IP. Neither node alone can correlate identity and activity.
+
+Multi-hop is a Sovereign-tier feature.
+
+---
+
+### Can I use WraithVPN and another VPN at the same time?
+
+No — iOS allows only one active VPN tunnel at a time. If another VPN (such as Tailscale or a corporate VPN) is running, you'll need to disconnect it before connecting WraithVPN.
+
+---
+
+## Haven DNS
+
+### Is Haven DNS free?
+
+Yes. Haven is a free DNS-over-HTTPS profile powered by AdGuard Home + OISD blocklists on every WraithGate node. It works without an account and without a paid subscription.
+
+---
+
+### Does Haven work without WraithVPN?
+
+Yes. Haven is a standalone DNS profile — install it from [katafract.com/apps/haven](https://katafract.com/apps/haven) and it works independently of the VPN.
+
+---
+
+## Account & billing
+
+### What's included in the Enclave tier?
+
+Enclave ($8/mo or $64/yr) includes:
+
+- WraithVPN with single-hop connections and kill switch
+- Haven DNS with tier selection
+- 5 devices
+- All utility apps unlocked: ExifArmor, ParkArmor, DocArmor, SafeOpen
+- 50 AI credits/month
+
+### What's included in the Sovereign tier?
+
+Sovereign ($18/mo or $144/yr) includes everything in Enclave plus:
+
+- Multi-hop VPN
+- 1 TB Vaultyx encrypted storage
+- Cross-device sync
+- All future Katafract apps
+- Priority support
+- 100 AI credits/month

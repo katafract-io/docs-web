@@ -129,6 +129,12 @@ export default defineConfig({
             { label: 'All changes', slug: 'changelog' },
           ],
         },
+        {
+          label: 'Support',
+          items: [
+            { label: 'FAQ', slug: 'faq' },
+          ],
+        },
       ],
     }),
   ],
